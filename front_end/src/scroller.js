@@ -111,7 +111,7 @@ export default class Scroller extends React.Component {
     }
 
     fetchClassData = async(classname) => {
-        return await fetch(`/${classname}`)
+        return await fetch(`${process.env.REACT_APP_SERVER_URL}/${classname}`)
             .then(res => {
               return res.json()
             })
