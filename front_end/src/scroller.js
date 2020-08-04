@@ -129,10 +129,10 @@ export default class Scroller extends React.Component {
         })
         let open_display = "? "
         if (index !== -1 && real_openclose[index].open_seats === 0) {
-            open_display = "🔴 "
+            open_display = `🔴(${real_openclose[index].open_seats}) | `
         } 
         if (index !== -1 && real_openclose[index].open_seats > 0) {
-            open_display = "🟢 "
+            open_display = `🟢(${real_openclose[index].open_seats}) | `
         }
 
         let disp_obj = {};
