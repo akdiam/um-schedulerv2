@@ -31,7 +31,7 @@ html, body {
     float: right;
     display: grid;
 }
-
+.weekCalendar__content{position:relative;width:auto;overflow:auto;max-height:800px}
 .weekCalendar{
     position: relative;
     float: right;
