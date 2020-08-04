@@ -1089,7 +1089,7 @@ export default class Scroller extends React.Component {
                 <div className = "left-div">
                     {/* SEARCH FOR CLASS */}
                     <div id="top-row">
-                        <h3 style={{textAlign:'center'}}>umich scheduler</h3>
+                        <h3 style={{textAlign:'center'}}>umich scheduler (w/    no conflicts)</h3>
                         <Button variant="outlined" color="primary" startIcon={<GitHubIcon/>} onClick={this.showSource}>Source</Button>
                     </div>
                     
