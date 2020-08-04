@@ -35,11 +35,6 @@ const spacingStyle = {
     padding: 15,
 }
 
-const descriptionStyle = {
-    fontSize: "medium",
-    textAlign: "left"
-}
-
 const animatedComponents = makeAnimated();
 export default class Scroller extends React.Component {
     constructor(props) {
