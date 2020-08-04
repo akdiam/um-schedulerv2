@@ -17,6 +17,7 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import Grid from '@material-ui/core/Grid'
 import PublicIcon from '@material-ui/icons/Public';
 import HttpsIcon from '@material-ui/icons/Https';
+import GitHubIcon from '@material-ui/icons/GitHub';
 
 const buttonStyle = {
     padding: 25,
@@ -819,7 +820,10 @@ export default class Scroller extends React.Component {
         let art_url_obj = ClassLinks[this.state.CurrentSubj].filter(subj => subj['num'] === parseInt(this.state.SelectedClass))
         let actual_art_url = art_url_obj[0]['art']
         window.open(actual_art_url)
-        // test commit 
+    }
+
+    showSource = () => {
+        window.open('https://github.com/akdiam/um-schedulerv2')
     }
 
     render() {
@@ -1089,7 +1093,11 @@ export default class Scroller extends React.Component {
             <div>
                 <div className = "left-div">
                     {/* SEARCH FOR CLASS */}
-                    <h3 style={{textAlign:'center'}}>umich scheduler</h3>
+                    <div id="top-row">
+                        <h3 style={{textAlign:'center'}}>umich scheduler</h3>
+                        <Button variant="outlined" color="primary" startIcon={<GitHubIcon/>} onClick={this.showSource}>Source</Button>
+                    </div>
+                    
                     {search_bar}
                     
                     {/*HEADER FOR SCROLLER*/}
