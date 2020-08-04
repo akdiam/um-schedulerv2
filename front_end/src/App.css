@@ -1,0 +1,113 @@
+html, body {
+    min-height: 100vh;
+    padding: 0;
+    margin: 0;
+    overflow: auto;
+}
+
+#root {
+    min-height: 100vh;
+}
+
+.container {
+    min-height: 100vh;
+    background-color: #FFFDFA;
+    color: black;
+}
+
+.left-div{
+    text-align: center;
+    float: left;
+    width:45%;
+    padding-left: 35px;
+    min-height: 100vh;
+}
+
+.right-div {
+    flex-wrap: wrap;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 50%;
+    float: right;
+    display: grid;
+}
+
+.weekCalendar{
+    position: relative;
+    float: right;
+    left: auto;
+    right: 20px;
+    top: 20px;
+    box-sizing:border-box;
+    width:100%;height:100%;
+    overflow:hidden;
+    padding-left:125px;
+    padding-top:28px;
+    color:#6b6b6b;
+    grid-row: 1;
+}
+
+.event{
+    position:relative;
+    border-radius: 3px;
+    overflow:hidden;
+    width:100%;height:100%;
+    outline: darkblue;
+    outline-width: 2px;
+    color: #4a4242;
+    background-color:#8fcaf9; 
+    font-size: x-small;
+}
+
+.btn {
+    position: relative;
+    display: grid;
+    grid-template-columns: 64px 64px 64px;
+    flex-wrap: wrap !important;
+    flex-direction: row !important;
+    min-height: 5vh;
+    margin: 20px auto;
+    grid-row: 2;
+    text-align: center;
+}
+
+.pages {
+    text-align: center;
+    top: 20px;
+    font-size: large;
+    line-height: 55px;
+}
+
+.container{
+    flex-wrap: wrap;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    font-family: Roboto, sans-serif;
+}
+.calendarBody__cell{background-color:#FFFDFA;border-bottom:1px solid #dbdbdb}
+
+.calendarBody__column{display:table-cell;border-right:1px solid #b7b7b7;min-width:100px}
+
+#back{
+    padding: 10px;
+    margin-bottom: 10px;
+    margin-top: 8px;
+}
+
+#descriptions{
+    font-size: small;
+    text-align: left;
+    margin-top: 50px;
+}
+
+#fullname {
+    margin-top: 5px;
+    text-align: left;
+    float: left;
+    margin-bottom: 25px;
+}
+#headaerStyle {
+    text-align: left;
+    font-size: small;
+}
