@@ -2,8 +2,6 @@ const get_classes = require('./scraper.js')
 const express = require("express")
 const exp = express()
 
-const port = 5000;
-
 exp.get("/", (req, res) => {
     res.json('home page')
 });
@@ -16,5 +14,5 @@ exp.get('/:classname', (req, res) => {
         res.json(class_data);
     });
 }); 
-
+const port = process.env.PORT || 5000
 exp.listen(port, () => console.log(`backend server listening on port ${[port]}!`)); 
