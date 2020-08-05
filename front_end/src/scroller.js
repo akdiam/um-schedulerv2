@@ -100,7 +100,7 @@ export default class Scroller extends React.Component {
             current_search: '',
 
             // show description
-            show_desc: false,
+            show_desc: true,
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -292,13 +292,15 @@ export default class Scroller extends React.Component {
     }
 
     // add to array of all selectedIntervals 
-    update_selectedIntervals = (all_schedules, interval_obj) => {
+    update_selectedIntervals = (all_schedules, interval_obj, type) => {
         let conflict_counter = 0;
-        let noconflict_counter = 0;
+        let missing_classes = '';
+        let classes_to_remove = [];
+        //let noconflict_counter = 0;
         // set up selected intervals
         let new_all = []
         if (interval_obj.length === 0) {
-            return [all_schedules, true]
+            return [all_schedules, true, classes_to_remove]
         }
 
         if (all_schedules.length === 0) {
@@ -310,13 +312,14 @@ export default class Scroller extends React.Component {
                 }
                 new_all.push(inner_arr)
             }
-            return [new_all, true]
+            return [new_all, true, classes_to_remove]
         } 
         // add to existing selected intervals
         else {
             // over container of all intervals 
             for (let k = 0; k < interval_obj.length; ++k) {
                 //(allSelectedIntervals)
+                let inner_conflict_counter = 0;
                 for (let i = 0; i < all_schedules.length; ++i) {
                     // over each specific selectedInterval
                     let has_conflict = false;
@@ -327,27 +330,38 @@ export default class Scroller extends React.Component {
                                                     interval_obj[k][h]['start'], interval_obj[k][h]['end'])) {
                                 has_conflict = true;
                             } 
-                            // check if time or days dont exist here
                         }
                     } 
                     if (!has_conflict) {
                         let concatted_sched = all_schedules[i].concat(interval_obj[k])
                         new_all.push(concatted_sched)
-                        ++noconflict_counter
+                        //++noconflict_counter
                     } 
                     else {
-                        ++conflict_counter
+                        ++inner_conflict_counter
+                        //can_add = false;
                     }
                 }
+                if (inner_conflict_counter === all_schedules.length) {
+                    ++conflict_counter
+                    if (!missing_classes.includes(interval_obj[k][0]['value'])) {
+                        missing_classes += (interval_obj[k][0]['value'] + ', ')
+                        classes_to_remove.push(interval_obj[k][0]['value'])
+                    }
+                } 
             }
         }
-        // TODO: find better way to see if all classes conflict
-        if (conflict_counter >= all_schedules.length && noconflict_counter < conflict_counter) {
-            alert("Couldn't add class to schedule: conflicted with every possible schedule")
-            return [all_schedules, false];
+        if (conflict_counter === interval_obj.length) {
+            alert(`Couldn't add any ${type} that you selected to your schedule because all brought conflicts`)
+            return [all_schedules, false, classes_to_remove];
         } 
         else {
-            return [new_all, true];
+            if (missing_classes.length === 0) {
+                return [new_all, true, classes_to_remove];
+            } else {
+                alert(`Couldn't add ${missing_classes} to your schedule because they brought conflicts`)
+                return [new_all, true, classes_to_remove];
+            }
         }
     }
 
@@ -459,7 +473,7 @@ export default class Scroller extends React.Component {
                 SelectedSems: [],
                 SelectedRecs: [],
                 openClosedDisplays: openclose_temp[0],
-                show_desc: false,
+                show_desc: true,
             })
         } 
     }
@@ -513,7 +527,7 @@ export default class Scroller extends React.Component {
             SemArray: [],
             RecArray: [],
             current_search: '',
-            show_desc: false,
+            show_desc: true,
         })
     }
 
@@ -535,7 +549,7 @@ export default class Scroller extends React.Component {
             // set up selectedInterval (currently displayed classes)
             // add everything selected lec into all intervals, choose first of those to actually display
             intervalObj["LEC"] = this.addAllIntervals(obj["lecs"], obj["class"], "LEC") 
-            let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["LEC"])
+            let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["LEC"], "LEC")
             temp_allSelectedIntervals = temp[0]
 
             // if these lectures didn't fit, don't include them in allintervals or scheduledclasses
@@ -543,46 +557,76 @@ export default class Scroller extends React.Component {
             if (!temp[1]) {
                 delete obj["lecs"]
                 delete intervalObj["LEC"]
+            } else {
+                if (temp[2].length !== 0) {
+                    for (let i = 0; i < temp[2].length; ++i) {
+                        intervalObj["LEC"] = intervalObj["LEC"].filter(subj => subj[0]['value'] !== temp[2][i])
+                    }
+                }
             }
         }
         if (this.state.SelectedDiscs !== null && this.state.SelectedDiscs.length !== 0) {
             obj["discs"]=this.handleScheduling(this.state.SelectedDiscs);
             intervalObj["DIS"] = this.addAllIntervals(obj["discs"], obj["class"], "DIS")
-            let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["DIS"])
+            let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["DIS"], "DIS")
             temp_allSelectedIntervals = temp[0]
             if (!temp[1]) {
                 delete obj["discs"]
                 delete intervalObj["DIS"]
+            } else {
+                if (temp[2].length !== 0) {
+                    for (let i = 0; i < temp[2].length; ++i) {
+                        intervalObj["DIS"] = intervalObj["DIS"].filter(subj => subj[0]['value'] !== temp[2][i])
+                    }
+                }
             }
         }
         if (this.state.SelectedLabs !== null && this.state.SelectedLabs.length !== 0) {
             obj["labs"]=this.handleScheduling(this.state.SelectedLabs);
             intervalObj["LAB"] = this.addAllIntervals(obj["labs"], obj["class"], "LAB")
-            let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["LAB"])
+            let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["LAB"], "LAB")
             temp_allSelectedIntervals = temp[0]
             if (!temp[1]) {
                 delete obj["labs"]
                 delete intervalObj["LAB"]
+            } else {
+                if (temp[2].length !== 0) {
+                    for (let i = 0; i < temp[2].length; ++i) {
+                        intervalObj["LAB"] = intervalObj["LAB"].filter(subj => subj[0]['value'] !== temp[2][i])
+                    }
+                }
             }
         }
         if (this.state.SelectedSems !== null && this.state.SelectedSems.length !== 0) {
             obj["sems"]=this.handleScheduling(this.state.SelectedSems);
             intervalObj["SEM"] = this.addAllIntervals(obj["sems"], obj["class"], "SEM")
-            let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["SEM"])
+            let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["SEM"], "SEM")
             temp_allSelectedIntervals = temp[0]
             if (!temp[1]) {
                 delete obj["sems"]
                 delete intervalObj["SEM"]
+            } else {
+                if (temp[2].length !== 0) {
+                    for (let i = 0; i < temp[2].length; ++i) {
+                        intervalObj["SEM"] = intervalObj["SEM"].filter(subj => subj[0]['value'] !== temp[2][i])
+                    }
+                }
             }
         }
         if (this.state.SelectedRecs !== null && this.state.SelectedRecs.length !== 0) {
             obj["recs"]=this.handleScheduling(this.state.SelectedRecs);
             intervalObj["REC"] = this.addAllIntervals(obj["recs"], obj["class"], "REC")
-            let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["REC"])
+            let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["REC"], "REC")
             temp_allSelectedIntervals = temp[0]
             if (!temp[1]) {
                 delete obj["recs"]
                 delete intervalObj["REC"]
+            } else {
+                if (temp[2].length !== 0) {
+                    for (let i = 0; i < temp[2].length; ++i) {
+                        intervalObj["REC"] = intervalObj["REC"].filter(subj => subj[0]['value'] !== temp[2][i])
+                    }
+                }
             }
         }
 
@@ -1090,6 +1134,7 @@ export default class Scroller extends React.Component {
                     {/* SEARCH FOR CLASS */}
                     <div id="top-row">
                         <h3 style={{textAlign:'center'}}>umich scheduler (w/    no conflicts)</h3>
+                        <p id="blurb">add as many sections as you want, let the scheduler do the rest of the work for you!</p>
                         <Button variant="outlined" color="primary" startIcon={<GitHubIcon/>} onClick={this.showSource}>Source</Button>
                     </div>
                     

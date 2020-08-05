@@ -1,0 +1,4 @@
+*regex searches ex: 'musicol' returns a valid subject, but 'musicology' doesn't
+*default to expanded info section DONE
+*add an about section to explain how the app works DONE?
+*fix conflict handling
