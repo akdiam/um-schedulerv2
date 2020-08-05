@@ -948,11 +948,13 @@ export default class Scroller extends React.Component {
         let no_alert;
         let some_alert;
         if (this.state.no_overall_sections !== "Oops! Couldn't add any ") {
+            window.scrollTo(0, 0)
             no_alert = <Alert onClose={this.handleNoAlert} severity="error">
                 {this.state.no_overall_sections}from {this.state.FullSelectedClass} because all of these create conflict with your current schedule(s). Consider rearranging your schedule, or adding other sections if possible!
                 </Alert>
         }
         if (this.state.some_overall_sections !== "Oops! Couldn't add ") {
+            window.scrollTo(0, 0)
             some_alert = <Alert onClose={this.handleSomeAlert} severity="warning">
                 {this.state.some_overall_sections}because all of these sections create conflict with your current schedule(s). Consider rearranging your schedule, or adding other sections if possible!
                 </Alert>
