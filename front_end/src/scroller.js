@@ -139,7 +139,7 @@ export default class Scroller extends React.Component {
         disp_obj["value"] = section['Class Nbr']
         disp_obj["label"] = open_display + "Section " + section['Section'] + " | "
         + section['M']+section['T']+section['W']+section['TH']+section['F']
-        + " | " + section['Time'] + " | " + section['Class Nbr']
+        + " | " + section['Time'] + " | " + section['Class Nbr'] + " | " + section['Location']
         disp_obj["time"] = section['Time']
         let thurs = ''
         if (section['TH'] === 'TH') {
@@ -147,6 +147,7 @@ export default class Scroller extends React.Component {
         }
         disp_obj["days"] = section['M']+section['T']+section['W']+thurs+section['F']
         disp_obj["section"] = section['Section']
+        disp_obj["location"] = section['Location']
         return disp_obj;
     }
 
@@ -233,6 +234,7 @@ export default class Scroller extends React.Component {
             innerobj["timeslot"] = this.formatTime(selected_list[i]['time'])
             innerobj["days"] = this.formatDays(selected_list[i]['days'])
             innerobj["section"] = selected_list[i]['section']
+            innerobj["location"] = selected_list[i]['location']
             class_arr.push(innerobj);
             innerobj = {};
             console.log(this.formatTime(selected_list[i]['time']))
@@ -265,7 +267,7 @@ export default class Scroller extends React.Component {
                                             m: unformattedIntervals[i]['timeslot']['end_obj']['min']})
                                             .day(unformattedIntervals[i]['days'][j])
                 innerobj['value'] = class_name + " " + class_type + " " + unformattedIntervals[i]['section']
-                + " ID: " + unformattedIntervals[i]['description']['value']
+                + " ID: " + unformattedIntervals[i]['description']['value'] + " " + unformattedIntervals[i]['location']
                 interval_arr_in.push(innerobj)
                 innerobj = {}
             }
