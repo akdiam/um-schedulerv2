@@ -948,10 +948,14 @@ export default class Scroller extends React.Component {
         let no_alert;
         let some_alert;
         if (this.state.no_overall_sections !== "Oops! Couldn't add any ") {
-            no_alert = <Alert onClose={this.handleNoAlert} severity="error">{this.state.no_overall_sections}because all of them conflicted with your current schedules</Alert>
+            no_alert = <Alert onClose={this.handleNoAlert} severity="error">
+                {this.state.no_overall_sections}from {this.state.FullSelectedClass} because all of these create conflict with your current schedule(s). Consider rearranging your schedule, or adding other sections if possible!
+                </Alert>
         }
         if (this.state.some_overall_sections !== "Oops! Couldn't add ") {
-            some_alert = <Alert onClose={this.handleSomeAlert} severity="warning">{this.state.some_overall_sections}because all of these sections conflicted with your current schedule</Alert>
+            some_alert = <Alert onClose={this.handleSomeAlert} severity="warning">
+                {this.state.some_overall_sections}because all of these sections create conflict with your current schedule(s). Consider rearranging your schedule, or adding other sections if possible!
+                </Alert>
         }
         
         if (this.state.ScheduledClasses.length !== 0) {
@@ -1198,8 +1202,10 @@ export default class Scroller extends React.Component {
 
         return (
             <div>
+                <div className="banner">
                 {no_alert}
                 {some_alert}
+                </div>
                 <div className = "left-div">
                     {/* SEARCH FOR CLASS */}
                     <div id="top-row">
