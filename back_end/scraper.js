@@ -7,9 +7,7 @@ fos = (input) => (async() => {
     let class_page = '';
     if (class_name.includes("CHEM")) {
         class_page =  `https://www.lsa.umich.edu/cg/cg_detail.aspx?content=2310${class_name}100&termArray=f_20_2310"`;
-    } 
-    
-    else {
+    } else {
         class_page = `https://www.lsa.umich.edu/cg/cg_detail.aspx?content=2310${class_name}001&termArray=f_20_2310"`;
     }
     

@@ -18,6 +18,7 @@ import Grid from '@material-ui/core/Grid'
 import PublicIcon from '@material-ui/icons/Public';
 import HttpsIcon from '@material-ui/icons/Https';
 import GitHubIcon from '@material-ui/icons/GitHub';
+import Alert from '@material-ui/lab/Alert';
 
 const buttonStyle = {
     padding: 25,
@@ -103,6 +104,10 @@ export default class Scroller extends React.Component {
 
             // show description
             show_desc: true,
+
+            // alert message
+            no_overall_sections: "Oops! Couldn't add any ",
+            some_overall_sections: "Oops! Couldn't add ",
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -356,14 +361,14 @@ export default class Scroller extends React.Component {
             }
         }
         if (conflict_counter === interval_obj.length) {
-            alert(`Couldn't add any ${type} that you selected to your schedule because all brought conflicts`)
+            //alert(`Couldn't add any ${type} that you selected to your schedule because all brought conflicts`)
             return [all_schedules, false, classes_to_remove];
         } 
         else {
             if (missing_classes.length === 0) {
                 return [new_all, true, classes_to_remove];
             } else {
-                alert(`Couldn't add ${missing_classes} to your schedule because they brought conflicts`)
+                //alert(`Couldn't add ${missing_classes} to your schedule because they brought conflicts`)
                 return [new_all, true, classes_to_remove];
             }
         }
@@ -481,6 +486,8 @@ export default class Scroller extends React.Component {
                 SelectedRecs: [],
                 openClosedDisplays: openclose_temp[0],
                 show_desc: true,
+                no_overall_sections: "Oops! Couldn't add any ",
+                some_overall_sections: "Oops! Couldn't add ",
             })
         } 
     }
@@ -536,6 +543,8 @@ export default class Scroller extends React.Component {
                 RecArray: [],
                 current_search: '',
                 show_desc: true,
+                no_overall_sections: "Oops! Couldn't add any ",
+                some_overall_sections: "Oops! Couldn't add ",
             })
         }
     }
@@ -546,6 +555,8 @@ export default class Scroller extends React.Component {
         let obj = {};
         let intervalObj = {};
         let potentialSelected = [];
+        let tempAll = ''
+        let tempWarn = ''
 
         // seriously keeps track of all selected
         let temp_allSelectedIntervals = this.state.allSelectedIntervals
@@ -564,11 +575,15 @@ export default class Scroller extends React.Component {
             // if these lectures didn't fit, don't include them in allintervals or scheduledclasses
             // this helps when a class is deleted so no surprise conflicts are made when rescheduling
             if (!temp[1]) {
+                console.log("asdasdasdasd")
+                tempAll += "LEC, "
+                console.log(tempAll)
                 delete obj["lecs"]
                 delete intervalObj["LEC"]
             } else {
                 if (temp[2].length !== 0) {
                     for (let i = 0; i < temp[2].length; ++i) {
+                        tempWarn += (temp[2][i] + ", ")
                         intervalObj["LEC"] = intervalObj["LEC"].filter(subj => subj[0]['value'] !== temp[2][i])
                     }
                 }
@@ -580,11 +595,13 @@ export default class Scroller extends React.Component {
             let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["DIS"], "DIS")
             temp_allSelectedIntervals = temp[0]
             if (!temp[1]) {
+                tempAll += "DIS, "
                 delete obj["discs"]
                 delete intervalObj["DIS"]
             } else {
                 if (temp[2].length !== 0) {
                     for (let i = 0; i < temp[2].length; ++i) {
+                        tempWarn += (temp[2][i] + ", ")
                         intervalObj["DIS"] = intervalObj["DIS"].filter(subj => subj[0]['value'] !== temp[2][i])
                     }
                 }
@@ -596,11 +613,13 @@ export default class Scroller extends React.Component {
             let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["LAB"], "LAB")
             temp_allSelectedIntervals = temp[0]
             if (!temp[1]) {
+                tempAll += "LAB, "
                 delete obj["labs"]
                 delete intervalObj["LAB"]
             } else {
                 if (temp[2].length !== 0) {
                     for (let i = 0; i < temp[2].length; ++i) {
+                        tempWarn += (temp[2][i] + ", ")
                         intervalObj["LAB"] = intervalObj["LAB"].filter(subj => subj[0]['value'] !== temp[2][i])
                     }
                 }
@@ -612,11 +631,13 @@ export default class Scroller extends React.Component {
             let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["SEM"], "SEM")
             temp_allSelectedIntervals = temp[0]
             if (!temp[1]) {
+                tempAll += "SEM, "
                 delete obj["sems"]
                 delete intervalObj["SEM"]
             } else {
                 if (temp[2].length !== 0) {
                     for (let i = 0; i < temp[2].length; ++i) {
+                        tempWarn += (temp[2][i] + ", ")
                         intervalObj["SEM"] = intervalObj["SEM"].filter(subj => subj[0]['value'] !== temp[2][i])
                     }
                 }
@@ -628,11 +649,13 @@ export default class Scroller extends React.Component {
             let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["REC"], "REC")
             temp_allSelectedIntervals = temp[0]
             if (!temp[1]) {
+                tempAll += "REC, "
                 delete obj["recs"]
                 delete intervalObj["REC"]
             } else {
                 if (temp[2].length !== 0) {
                     for (let i = 0; i < temp[2].length; ++i) {
+                        tempWarn += (temp[2][i] + ", ")
                         intervalObj["REC"] = intervalObj["REC"].filter(subj => subj[0]['value'] !== temp[2][i])
                     }
                 }
@@ -642,12 +665,20 @@ export default class Scroller extends React.Component {
         // if everything is empty, avoid changing the state because nothing needs to be modified
         if (!('lecs' in obj) && !('discs' in obj) && !('labs' in obj) && !('sems' in obj) && !('recs' in obj)) {
             //obj = {}
+            this.setState({
+                no_overall_sections: "Oops! Couldn't add any " + tempAll,
+                some_overall_sections: "Oops! Couldn't add " + tempWarn,
+            })
             return
         }
         // if everything is empty, avoid changing the state because nothing needs to be modified
         if (!('LEC' in intervalObj) && !('DIS' in intervalObj) && !('LAB' in intervalObj) 
         && !('REC' in intervalObj) && !('SEM' in intervalObj)) {
             //intervalObj = {}
+            this.setState({
+                no_overall_sections: "Oops! Couldn't add any " + tempAll,
+                some_overall_sections: "Oops! Couldn't add " + tempWarn,
+            })
             return
         }
 
@@ -668,6 +699,8 @@ export default class Scroller extends React.Component {
             allSelectedIntervals: temp_allSelectedIntervals,
             numSchedules: new_sched_size,
             curr_index: 0,
+            no_overall_sections: "Oops! Couldn't add any " + tempAll,
+            some_overall_sections: "Oops! Couldn't add " + tempWarn,
         })
     }
 
@@ -717,7 +750,9 @@ export default class Scroller extends React.Component {
             selectedIntervals: new_selected_intervals,
             allSelectedIntervals: filtered_scheds,
             curr_index: 0,
-            numSchedules: new_num_sched
+            numSchedules: new_num_sched,
+            no_overall_sections: "Oops! Couldn't add any ",
+            some_overall_sections: "Oops! Couldn't add ",
         })
     }
 
@@ -843,6 +878,8 @@ export default class Scroller extends React.Component {
             SelectedSems: [],
             SelectedRecs: [],
             openClosedDisplays: openclose_temp[0],
+            no_overall_sections: "Oops! Couldn't add any ",
+            some_overall_sections: "Oops! Couldn't add ",
         })
 
     }
@@ -875,6 +912,18 @@ export default class Scroller extends React.Component {
         window.open('https://github.com/akdiam/um-schedulerv2')
     }
 
+    handleNoAlert = () => {
+        this.setState({
+            no_overall_sections: "Oops! Couldn't add any ",
+        })
+    }
+
+    handleSomeAlert = () => {
+        this.setState({
+            some_overall_sections: "Oops! Couldn't add ",
+        })
+    }
+
     render() {
         let displayed_scroller;
         let add_rm_buttons;
@@ -894,6 +943,16 @@ export default class Scroller extends React.Component {
         </div>
         let class_btns;
         let search_bar;
+        //no_overall_sections: "Oops! Couldn't add any ",
+        //some_overall_sections: "Oops! Couldn't add ",
+        let no_alert;
+        let some_alert;
+        if (this.state.no_overall_sections !== "Oops! Couldn't add any ") {
+            no_alert = <Alert onClose={this.handleNoAlert} severity="error">{this.state.no_overall_sections}because all of them conflicted with your current schedules</Alert>
+        }
+        if (this.state.some_overall_sections !== "Oops! Couldn't add ") {
+            some_alert = <Alert onClose={this.handleSomeAlert} severity="warning">{this.state.some_overall_sections}because all of these sections conflicted with your current schedule</Alert>
+        }
         
         if (this.state.ScheduledClasses.length !== 0) {
             class_btns = 
@@ -1139,6 +1198,8 @@ export default class Scroller extends React.Component {
 
         return (
             <div>
+                {no_alert}
+                {some_alert}
                 <div className = "left-div">
                     {/* SEARCH FOR CLASS */}
                     <div id="top-row">
