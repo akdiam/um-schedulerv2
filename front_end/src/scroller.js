@@ -36,6 +36,8 @@ const spacingStyle = {
 }
 
 const animatedComponents = makeAnimated();
+
+let can_go_back = true;
 export default class Scroller extends React.Component {
     constructor(props) {
         super(props);
@@ -422,11 +424,14 @@ export default class Scroller extends React.Component {
 
             // wait until this is done, then proceed with the rest of the logic (await)
             // this fetches all of the open/close data from the course guide
+            can_go_back = false;
             await this.fetchClassData(this.state.CurrentSubj+class_num.trim())
                 .then(class_data => {
                     openclose_temp.push(class_data);
                 }); 
+            
 
+            can_go_back = true;
             //console.table(openclose_temp[0])
             let real_openclose = openclose_temp[0]
         
@@ -500,37 +505,39 @@ export default class Scroller extends React.Component {
     }
 
     handleBack = () => {
-        this.setState({
-            showSubjs: true,
-            showClassDesc: false,
-            showClassList: false,
-            showCourseDesc: false,
-            FullSelectedClass: null,
-            SelectedLecs: [],
-            SelectedDiscs: [],
-            SelectedLabs: [],
-            SelectedSems: [],
-            SelectedRecs: [],
-            LecDisplays: null,
-            DiscDisplays: null,
-            LabDisplays: null,
-            SemDisplays: null,
-            RecDisplays: null,
-            FullSelectedClass: null,
-            SpecificClassList: null,
-            CurrentSubj: null,
-            FilteredClassList: null,
-            CompleteClassList: null,
-            SpecificClassList: null,
-            SelectedClass: null,
-            LecArray: [],
-            DiscArray: [],
-            LabArray: [],
-            SemArray: [],
-            RecArray: [],
-            current_search: '',
-            show_desc: true,
-        })
+        if (can_go_back) {
+            this.setState({
+                showSubjs: true,
+                showClassDesc: false,
+                showClassList: false,
+                showCourseDesc: false,
+                FullSelectedClass: null,
+                SelectedLecs: [],
+                SelectedDiscs: [],
+                SelectedLabs: [],
+                SelectedSems: [],
+                SelectedRecs: [],
+                LecDisplays: null,
+                DiscDisplays: null,
+                LabDisplays: null,
+                SemDisplays: null,
+                RecDisplays: null,
+                FullSelectedClass: null,
+                SpecificClassList: null,
+                CurrentSubj: null,
+                FilteredClassList: null,
+                CompleteClassList: null,
+                SpecificClassList: null,
+                SelectedClass: null,
+                LecArray: [],
+                DiscArray: [],
+                LabArray: [],
+                SemArray: [],
+                RecArray: [],
+                current_search: '',
+                show_desc: true,
+            })
+        }
     }
 
     // adds selected values to an array called ScheduledClasses
@@ -778,11 +785,12 @@ export default class Scroller extends React.Component {
 
         // wait until this is done, then proceed with the rest of the logic (await)
         // this fetches all of the open/close data from the course guide
+        can_go_back = false;
         await this.fetchClassData(inner_text+inner_num)
             .then(class_data => {
                 openclose_temp.push(class_data);
             }); 
-
+        can_go_back = true;
         //console.table(openclose_temp[0])
         let real_openclose = openclose_temp[0]
     
@@ -969,7 +977,6 @@ export default class Scroller extends React.Component {
             </Button>
             
             let description = ClassDescs[this.state.CurrentSubj].filter(subj => subj['num'] === parseInt(this.state.SelectedClass))
-            console.log(description)
             
             if (this.state.show_desc) {
                 class_header = 
