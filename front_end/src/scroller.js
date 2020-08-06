@@ -1110,6 +1110,10 @@ export default class Scroller extends React.Component {
         return tool_tip;
     }
 
+    handleSubmit = event => {
+        event.preventDefault();
+    }
+
     render() {
         let displayed_scroller;
         let add_rm_buttons;
@@ -1164,7 +1168,7 @@ export default class Scroller extends React.Component {
         {/* controls the display for subject listing */}
         if (this.state.showSubjs && !this.state.showClassList && !this.state.showClassDesc) {
             search_bar = 
-            <form>
+            <form onSubmit={this.handleSubmit}>
                 <TextField size="small" variant="outlined" id="search_subj" label="Search for a Subject" onChange={this.handleSearch}/> 
             </form>
 
@@ -1188,7 +1192,7 @@ export default class Scroller extends React.Component {
         {/* controls the display for specific class listings */}
         if (this.state.showClassList && !this.state.showSubjs && !this.state.showCourseDesc) {
             search_bar = 
-            <form>
+            <form onSubmit={this.handleSubmit}>
                 <TextField size="small" variant="outlined" id="search_class" label="Search for a Class" onChange={this.handleSearch}/> 
             </form>
 
@@ -1220,7 +1224,7 @@ export default class Scroller extends React.Component {
         {/* controls the display for class descriptions and add/remove btn */}
         if (this.state.showClassList && this.state.showCourseDesc) {
             search_bar = 
-            <form>
+            <form onSubmit={this.handleSubmit}> 
                 <TextField size="small" variant="outlined" id="search_class" label="Search for a Class" onChange={this.handleSearch}/> 
             </form>
 

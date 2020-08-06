@@ -131,9 +131,10 @@ html, body {
     top: -5px;
 }
 
-/*.dayCell:hover{
-}*/
-
+.dayCell:hover{
+    cursor: 'pointer';
+}
+.weekCalendar__overlay_status_selection{background-color:rgba(249,105,14,.2)}
 #blurb {
     font-size: small;
     margin-top: -12px;

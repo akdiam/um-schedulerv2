@@ -4,3 +4,4 @@
 *fix conflict handling DONE
 *credit counter
 *when 'enter' is pressed on the search bar the page reloads
+*add spinner
