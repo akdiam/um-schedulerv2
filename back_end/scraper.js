@@ -54,7 +54,6 @@ fos = (input) => (async() => {
         class_data.push(relevant_info)
     })  
 
-    // log all the class data 
     return class_data
 })();
 

@@ -19,6 +19,7 @@ import PublicIcon from '@material-ui/icons/Public';
 import HttpsIcon from '@material-ui/icons/Https';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import Alert from '@material-ui/lab/Alert';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const buttonStyle = {
     padding: 25,
@@ -166,9 +167,7 @@ export default class Scroller extends React.Component {
 
         let start = unformattedTime.substr(0, unformattedTime.indexOf('-'))
         let end = unformattedTime.split(/[- ABCDEFGHIJKLMNOPQRSTUVWXYZ]/)[1]
-        console.log(end)
         let ampm = unformattedTime.split(/[- 0123456789]/).slice(-1)[0]
-        console.log(ampm)
         let start_hour
         let start_min
         let end_hour
@@ -244,7 +243,6 @@ export default class Scroller extends React.Component {
             innerobj["location"] = selected_list[i]['location']
             class_arr.push(innerobj);
             innerobj = {};
-            console.log(this.formatTime(selected_list[i]['time']))
         }
         // set the corresponding key of obj to the collected sections
         return class_arr
@@ -300,20 +298,43 @@ export default class Scroller extends React.Component {
         return false;
     }
 
+    check_forgotten = (potential, new_all) => {
+        let forgotten_classes = []
+        //for (let potential_class in potential) {
+        for (let i = 0; i < potential.length; ++i) { 
+            let class_in_sched = false;
+            //for (let indiv_sched in new_all) {
+            for (let j = 0; j < new_all.length; ++j) { 
+                //for (let slot in indiv_sched) {
+                for (let k = 0; k < new_all[j].length; ++k) { 
+                    if (new_all[j][k]['value'] === potential[i]) {
+                        class_in_sched = true;
+                        continue;
+                    }
+                }
+            }
+            if (!class_in_sched) {
+                forgotten_classes.push(potential[i])
+            }
+        }
+        return forgotten_classes
+    }
+
     // add to array of all selectedIntervals 
     update_selectedIntervals = (all_schedules, interval_obj, type) => {
         let conflict_counter = 0;
         let missing_classes = '';
         let classes_to_remove = [];
+        let unadded = []
+        let forgotten_classes = []
         //let noconflict_counter = 0;
         // set up selected intervals
         let new_all = []
         if (interval_obj.length === 0) {
-            return [all_schedules, true, classes_to_remove]
+            return [all_schedules, true, classes_to_remove, forgotten_classes]
         }
 
         if (all_schedules.length === 0) {
-            console.log('true')
             for (let i = 0; i < interval_obj.length; ++i) {
                 let inner_arr = [];
                 for (let j = 0; j < interval_obj[i].length; ++j) {
@@ -321,7 +342,7 @@ export default class Scroller extends React.Component {
                 }
                 new_all.push(inner_arr)
             }
-            return [new_all, true, classes_to_remove]
+            return [new_all, true, classes_to_remove, forgotten_classes]
         } 
         // add to existing selected intervals
         else {
@@ -348,6 +369,11 @@ export default class Scroller extends React.Component {
                     } 
                     else {
                         ++inner_conflict_counter
+                        for (let o = 0; o < all_schedules[i].length; ++o) {
+                            if (!(all_schedules[i][o]['value'] in unadded)) {
+                                unadded.push(all_schedules[i][o]['value'])
+                            }
+                        }
                         //can_add = false;
                     }
                 }
@@ -362,14 +388,16 @@ export default class Scroller extends React.Component {
         }
         if (conflict_counter === interval_obj.length) {
             //alert(`Couldn't add any ${type} that you selected to your schedule because all brought conflicts`)
-            return [all_schedules, false, classes_to_remove];
+            return [all_schedules, false, classes_to_remove, forgotten_classes];
         } 
         else {
+            forgotten_classes = this.check_forgotten(unadded, new_all)
+
             if (missing_classes.length === 0) {
-                return [new_all, true, classes_to_remove];
+                return [new_all, true, classes_to_remove, forgotten_classes];
             } else {
                 //alert(`Couldn't add ${missing_classes} to your schedule because they brought conflicts`)
-                return [new_all, true, classes_to_remove];
+                return [new_all, true, classes_to_remove, forgotten_classes];
             }
         }
     }
@@ -495,14 +523,11 @@ export default class Scroller extends React.Component {
     // updates the appropriate state arrays 
     // when class times are selected
     handleChange = (value, action) => {
-        console.log(action.name)
         if (action.name === 'lecs') {
             this.setState({SelectedLecs:value})
         } if (action.name === 'disc') {
             this.setState({SelectedDiscs:value})
         } if (action.name === 'lab') {
-            console.log(action.name)
-            console.log(value)
             this.setState({SelectedLabs:value})
         } if (action.name === 'sem') {
             this.setState({SelectedSems:value})
@@ -511,6 +536,7 @@ export default class Scroller extends React.Component {
         }
     }
 
+    // backkkkkkkk
     handleBack = () => {
         if (can_go_back) {
             this.setState({
@@ -549,15 +575,85 @@ export default class Scroller extends React.Component {
         }
     }
 
+    // deletes classes that are no longer available (because of conflicts) from allIntervals
+    // called in handleAdd()
+    deleteIntervals = (temp_allintervals, forgotten) => {
+        // remove duplicates
+        let forgotten_nodupes = []
+        for (let i = 0; i < forgotten.length; ++i) {
+            if (!(forgotten_nodupes.includes(forgotten[i]))) {
+                forgotten_nodupes.push(forgotten[i])
+            }
+        }
+
+        // takes in (forgotten_nodupes), which is an array of classes that are no longer in schedules after this add
+        for (let k=0; k<forgotten_nodupes.length; ++k) {
+            for (let i=0; i<temp_allintervals.length; ++i) {
+                // filter all classes that aren't in forgotten_nodupes
+                if ('LEC' in temp_allintervals[i]) {
+                    console.log(temp_allintervals[i]['class'])
+                    temp_allintervals[i]['LEC'] = temp_allintervals[i]['LEC'].filter(subj => subj[0]['value'] !== forgotten_nodupes[k])
+                }
+                if ('DIS' in temp_allintervals[i]) {
+                    temp_allintervals[i]['DIS'] = temp_allintervals[i]['DIS'].filter(subj => subj[0]['value'] !== forgotten_nodupes[k])
+                }   
+                if ('LAB' in temp_allintervals[i]) {
+                    temp_allintervals[i]['LAB'] = temp_allintervals[i]['LAB'].filter(subj => subj[0]['value'] !== forgotten_nodupes[k])
+                }   
+                if ('SEM' in temp_allintervals[i]) {
+                    temp_allintervals[i]['SEM'] = temp_allintervals[i]['SEM'].filter(subj => subj[0]['value'] !== forgotten_nodupes[k])
+                }   
+                if ('REC' in temp_allintervals[i]) {
+                    temp_allintervals[i]['REC'] = temp_allintervals[i]['REC'].filter(subj => subj[0]['value'] !== forgotten_nodupes[k])
+                }   
+            }
+        }
+        return temp_allintervals
+    }
+
+    // deletes classes that are no longer available (because of conflicts) from ScheduledClasses
+    // called in handleAdd()
+    deleteScheduled = (temp_scheduled, forgotten) => {
+        let forgotten_nodupes = []
+        for (let i = 0; i < forgotten.length; ++i) {
+            if (!(forgotten_nodupes.includes(forgotten[i]))) {
+                forgotten_nodupes.push(forgotten[i])
+            }
+        }
+
+        for (let k=0; k<forgotten_nodupes.length; ++k) {
+            for (let i=0; i<temp_scheduled.length; ++i) {
+                if ('lecs' in temp_scheduled[i]) {
+                    temp_scheduled[i]['lecs'] = temp_scheduled[i]['lecs'].filter(subj => forgotten_nodupes[k].includes(subj['description']['value']) === false)
+                }
+                if ('discs' in temp_scheduled[i]) {
+                    temp_scheduled[i]['discs'] = temp_scheduled[i]['discs'].filter(subj => forgotten_nodupes[k].includes(subj['description']['value']) === false)
+                }   
+                if ('labs' in temp_scheduled[i]) {
+                    temp_scheduled[i]['labs'] = temp_scheduled[i]['labs'].filter(subj => forgotten_nodupes[k].includes(subj['description']['value']) === false)
+                }   
+                if ('sems' in temp_scheduled[i]) {
+                    temp_scheduled[i]['sems'] = temp_scheduled[i]['sems'].filter(subj => forgotten_nodupes[k].includes(subj['description']['value']) === false)
+                }   
+                if ('recs' in temp_scheduled[i]) {
+                    temp_scheduled[i]['recs'] = temp_scheduled[i]['recs'].filter(subj => forgotten_nodupes[k].includes(subj['description']['value']) === false)
+                }   
+            }
+        }
+        return temp_scheduled
+    }
+
     // adds selected values to an array called ScheduledClasses
     handleAdd = () => {
         // add all of the selected options to the calendar display array
         let obj = {};
         let intervalObj = {};
-        let potentialSelected = [];
         let tempAll = ''
         let tempWarn = ''
-
+        let types = []
+        let forgotten = []
+        let temp_allintervals = this.state.allIntervals
+        let temp_scheduled = this.state.ScheduledClasses
         // seriously keeps track of all selected
         let temp_allSelectedIntervals = this.state.allSelectedIntervals
 
@@ -565,6 +661,7 @@ export default class Scroller extends React.Component {
         intervalObj["class"] = this.state.CurrentSubj+this.state.SelectedClass;
         // push all of the selected class info into the scheduled classes container in state
         if (this.state.SelectedLecs !== null && this.state.SelectedLecs.length !== 0) {
+            types.push('lecs')
             obj["lecs"]=this.handleScheduling(this.state.SelectedLecs);
             // set up selectedInterval (currently displayed classes)
             // add everything selected lec into all intervals, choose first of those to actually display
@@ -574,22 +671,30 @@ export default class Scroller extends React.Component {
 
             // if these lectures didn't fit, don't include them in allintervals or scheduledclasses
             // this helps when a class is deleted so no surprise conflicts are made when rescheduling
+            // update tempAll warning string
             if (!temp[1]) {
-                console.log("asdasdasdasd")
                 tempAll += "LEC, "
-                console.log(tempAll)
                 delete obj["lecs"]
                 delete intervalObj["LEC"]
             } else {
+                // if there were classes the user selected that couldn't be added, filter that from both obj and intervalObj
+                // also add the classes to tempWarn warning string
                 if (temp[2].length !== 0) {
                     for (let i = 0; i < temp[2].length; ++i) {
                         tempWarn += (temp[2][i] + ", ")
                         intervalObj["LEC"] = intervalObj["LEC"].filter(subj => subj[0]['value'] !== temp[2][i])
+                        obj['lecs'] = obj['lecs'].filter(subj => temp[2][i].includes(subj['description']['value']) === false)
                     }
+                }
+                // if there were pre-existing classes that got removed because they all conflicted, 
+                // concat those with forgotten to keep track for the hover info on the class buttons
+                if (temp[3].length !== 0) {
+                    forgotten = forgotten.concat(temp[3])
                 }
             }
         }
         if (this.state.SelectedDiscs !== null && this.state.SelectedDiscs.length !== 0) {
+            types.push('discs')
             obj["discs"]=this.handleScheduling(this.state.SelectedDiscs);
             intervalObj["DIS"] = this.addAllIntervals(obj["discs"], obj["class"], "DIS")
             let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["DIS"], "DIS")
@@ -603,11 +708,16 @@ export default class Scroller extends React.Component {
                     for (let i = 0; i < temp[2].length; ++i) {
                         tempWarn += (temp[2][i] + ", ")
                         intervalObj["DIS"] = intervalObj["DIS"].filter(subj => subj[0]['value'] !== temp[2][i])
+                        obj['discs'] = obj['discs'].filter(subj => temp[2][i].includes(subj['description']['value']) === false)
                     }
+                }
+                if (temp[3].length !== 0) {
+                    forgotten = forgotten.concat(temp[3])
                 }
             }
         }
         if (this.state.SelectedLabs !== null && this.state.SelectedLabs.length !== 0) {
+            types.push('labs')
             obj["labs"]=this.handleScheduling(this.state.SelectedLabs);
             intervalObj["LAB"] = this.addAllIntervals(obj["labs"], obj["class"], "LAB")
             let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["LAB"], "LAB")
@@ -621,11 +731,16 @@ export default class Scroller extends React.Component {
                     for (let i = 0; i < temp[2].length; ++i) {
                         tempWarn += (temp[2][i] + ", ")
                         intervalObj["LAB"] = intervalObj["LAB"].filter(subj => subj[0]['value'] !== temp[2][i])
+                        obj['labs'] = obj['labs'].filter(subj => temp[2][i].includes(subj['description']['value']) === false)
                     }
+                }
+                if (temp[3].length !== 0) {
+                    forgotten = forgotten.concat(temp[3])
                 }
             }
         }
         if (this.state.SelectedSems !== null && this.state.SelectedSems.length !== 0) {
+            types.push('sems')
             obj["sems"]=this.handleScheduling(this.state.SelectedSems);
             intervalObj["SEM"] = this.addAllIntervals(obj["sems"], obj["class"], "SEM")
             let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["SEM"], "SEM")
@@ -639,11 +754,16 @@ export default class Scroller extends React.Component {
                     for (let i = 0; i < temp[2].length; ++i) {
                         tempWarn += (temp[2][i] + ", ")
                         intervalObj["SEM"] = intervalObj["SEM"].filter(subj => subj[0]['value'] !== temp[2][i])
+                        obj['sems'] = obj['sems'].filter(subj => temp[2][i].includes(subj['description']['value']) === false)
                     }
+                }
+                if (temp[3].length !== 0) {
+                    forgotten = forgotten.concat(temp[3])
                 }
             }
         }
         if (this.state.SelectedRecs !== null && this.state.SelectedRecs.length !== 0) {
+            types.push('recs')
             obj["recs"]=this.handleScheduling(this.state.SelectedRecs);
             intervalObj["REC"] = this.addAllIntervals(obj["recs"], obj["class"], "REC")
             let temp = this.update_selectedIntervals(temp_allSelectedIntervals, intervalObj["REC"], "REC")
@@ -657,14 +777,18 @@ export default class Scroller extends React.Component {
                     for (let i = 0; i < temp[2].length; ++i) {
                         tempWarn += (temp[2][i] + ", ")
                         intervalObj["REC"] = intervalObj["REC"].filter(subj => subj[0]['value'] !== temp[2][i])
+                        obj['recs'] = obj['recs'].filter(subj => temp[2][i].includes(subj['description']['value']) === false)
                     }
+                }
+                if (temp[3].length !== 0) {
+                    forgotten = forgotten.concat(temp[3])
                 }
             }
         }
 
         // if everything is empty, avoid changing the state because nothing needs to be modified
         if (!('lecs' in obj) && !('discs' in obj) && !('labs' in obj) && !('sems' in obj) && !('recs' in obj)) {
-            //obj = {}
+            // tell user what sections/classes couldn't be added
             this.setState({
                 no_overall_sections: "Oops! Couldn't add any " + tempAll,
                 some_overall_sections: "Oops! Couldn't add " + tempWarn,
@@ -674,12 +798,19 @@ export default class Scroller extends React.Component {
         // if everything is empty, avoid changing the state because nothing needs to be modified
         if (!('LEC' in intervalObj) && !('DIS' in intervalObj) && !('LAB' in intervalObj) 
         && !('REC' in intervalObj) && !('SEM' in intervalObj)) {
-            //intervalObj = {}
+            // tell user what sections/classes couldn't be added
             this.setState({
                 no_overall_sections: "Oops! Couldn't add any " + tempAll,
                 some_overall_sections: "Oops! Couldn't add " + tempWarn,
             })
             return
+        }
+        
+        // removes 'forgotten' classes (that don't exist anymore because of conflicts)
+        // from allIntervals and ScheduledClasses
+        if (forgotten.length !== 0) {
+            temp_allintervals = this.deleteIntervals(temp_allintervals, forgotten)
+            temp_scheduled = this.deleteScheduled(temp_scheduled, forgotten)
         }
 
         let new_sched_size = temp_allSelectedIntervals.length;
@@ -693,8 +824,8 @@ export default class Scroller extends React.Component {
             SelectedLabs: [],
             SelectedSems: [],
             SelectedRecs: [],
-            ScheduledClasses: this.state.ScheduledClasses.concat(obj),
-            allIntervals: this.state.allIntervals.concat(intervalObj),
+            ScheduledClasses: temp_scheduled.concat(obj),
+            allIntervals: temp_allintervals.concat(intervalObj),
             selectedIntervals: temp_allSelectedIntervals[0],
             allSelectedIntervals: temp_allSelectedIntervals,
             numSchedules: new_sched_size,
@@ -715,23 +846,23 @@ export default class Scroller extends React.Component {
         // remake all possible schedules
         for (let i = 0; i < new_array_all_intervals.length; ++i) {
             if ('lecs' in new_array[i]) {
-                let temp = this.update_selectedIntervals(filtered_scheds, new_array_all_intervals[i]['LEC'])
+                let temp = this.update_selectedIntervals(filtered_scheds, new_array_all_intervals[i]['LEC'], "LEC")
                 filtered_scheds = temp[0]
             }
             if (('discs') in new_array[i]) {
-                let temp = this.update_selectedIntervals(filtered_scheds, new_array_all_intervals[i]['DIS'])
+                let temp = this.update_selectedIntervals(filtered_scheds, new_array_all_intervals[i]['DIS'], "DIS")
                 filtered_scheds = temp[0]
             }
             if (('labs') in new_array[i]) {
-                let temp = this.update_selectedIntervals(filtered_scheds, new_array_all_intervals[i]['LAB'])
+                let temp = this.update_selectedIntervals(filtered_scheds, new_array_all_intervals[i]['LAB'], "LAB")
                 filtered_scheds = temp[0]
             }
             if (('sems') in new_array[i]) {
-                let temp = this.update_selectedIntervals(filtered_scheds, new_array_all_intervals[i]['SEM'])
+                let temp = this.update_selectedIntervals(filtered_scheds, new_array_all_intervals[i]['SEM'], "SEM")
                 filtered_scheds = temp[0]
             }
             if (('recs') in new_array[i]) {
-                let temp = this.update_selectedIntervals(filtered_scheds, new_array_all_intervals[i]['REC'])
+                let temp = this.update_selectedIntervals(filtered_scheds, new_array_all_intervals[i]['REC'], "REC")
                 filtered_scheds = temp[0]
             } 
         }
@@ -784,6 +915,7 @@ export default class Scroller extends React.Component {
         })
     }
 
+    // if a user clicks on a class button
     handleEvClick = async(event) => {
         // get complete_class_list
         let inner_text = event.target.innerText.replace(/[0-9]/g, '').trim()
@@ -802,7 +934,6 @@ export default class Scroller extends React.Component {
 
         let inner_num = event.target.innerText.match(/\d+/)[0].trim()
         let specific_class_list = relevant_classes.filter(subj => subj['Catalog Nbr'] === " "+inner_num)
-        console.table(specific_class_list)
         let description = specific_class_list[0]['Course Title']
         const lecs = specific_class_list.filter(subj => subj['Component'] === 'LEC')
         const discs = specific_class_list.filter(subj => subj['Component'] === 'DIS')
@@ -826,7 +957,7 @@ export default class Scroller extends React.Component {
                 openclose_temp.push(class_data);
             }); 
         can_go_back = true;
-        //console.table(openclose_temp[0])
+
         let real_openclose = openclose_temp[0]
     
         // gathering info to send to dropdown menus to display
@@ -924,6 +1055,61 @@ export default class Scroller extends React.Component {
         })
     }
 
+    updateToolTip = item => {
+        let tool_tip = ''
+        if ('lecs' in item) {
+            tool_tip += "Lectures: "
+            for (let i = 0; i < item['lecs'].length; ++i) {
+                if (i === item['lecs'].length - 1) {
+                    tool_tip += (item['lecs'][i]['section'] + '\n')
+                } else {
+                    tool_tip += (item['lecs'][i]['section'] + ', ')
+                }   
+            }
+        }
+        if ('discs' in item) {
+            tool_tip += "Discussions: "
+            for (let i = 0; i < item['discs'].length; ++i) {
+                if (i === item['discs'].length - 1) {
+                    tool_tip += (item['discs'][i]['section'] + '\n')
+                } else {
+                    tool_tip += (item['discs'][i]['section'] + ', ')
+                }   
+            }
+        }
+        if ('labs' in item) {
+            tool_tip += "Labs: "
+            for (let i = 0; i < item['labs'].length; ++i) {
+                if (i === item['labs'].length - 1) {
+                    tool_tip += (item['labs'][i]['section'] + '\n')
+                } else {
+                    tool_tip += (item['labs'][i]['section'] + ', ')
+                }   
+            }
+        }
+        if ('sems' in item) {
+            tool_tip += "Seminars: "
+            for (let i = 0; i < item['sems'].length; ++i) {
+                if (i === item['sems'].length - 1) {
+                    tool_tip += (item['sems'][i]['section'] + '\n')
+                } else {
+                    tool_tip += (item['sems'][i]['section'] + ', ')
+                }   
+            }
+        }
+        if ('recs' in item) {
+            tool_tip += "Recitations: "
+            for (let i = 0; i < item['recs'].length; ++i) {
+                if (i === item['recs'].length - 1) {
+                    tool_tip += (item['recs'][i]['section'] + '\n')
+                } else {
+                    tool_tip += (item['recs'][i]['section'] + ', ')
+                }   
+            }
+        } 
+        return tool_tip;
+    }
+
     render() {
         let displayed_scroller;
         let add_rm_buttons;
@@ -964,9 +1150,11 @@ export default class Scroller extends React.Component {
             class_btns = 
             <div>
                 {this.state.ScheduledClasses.map((item, index) => (
-                    <Button color = "primary" variant="outlined" size="medium" onClick={this.handleEvClick}>
-                        {item.class}
-                    </Button>
+                    <Tooltip title={this.updateToolTip(item)} placement="top" key={index}>
+                        <Button color = "primary" variant="outlined" size="medium" onClick={this.handleEvClick} key={index}>
+                            {item.class}
+                        </Button>
+                    </Tooltip>
                 ))}
                 <hr/>
             </div>
@@ -1045,12 +1233,12 @@ export default class Scroller extends React.Component {
             
             if (this.state.show_desc) {
                 class_header = 
-                <Grid container spacing = {3}>
-                    <Grid item xs justify = "flex-start" direction = "column">
+                <Grid container >
+                    <Grid item xs /*justify = "flex-start" direction = "column"*/>
                         <strong id="fullname">{this.state.FullSelectedClass}</strong>
                         <p id="descriptions">{this.state.SpecificClassList[0]['Units']} credits. {description[0]['desc']}</p>
                     </Grid>
-                    <Grid item xs = {3} direction="column" justify="space-between" alignItems="center">
+                    <Grid item xs = {3} /*direction="column" justify="space-between" alignItems="center"*/>
                         <Button variant="outlined" size="small" color="secondary" startIcon={<ExpandLessIcon/>} onClick={this.handleExpand}>Less</Button>
                         <Grid>
                             <Button variant="outlined" size="small" color="primary" startIcon={<PublicIcon/>} onClick={this.handleCG}>Course Guide</Button>
@@ -1060,8 +1248,8 @@ export default class Scroller extends React.Component {
                 </Grid>
             } else {
                 class_header = 
-                <Grid container spacing = {3}>
-                    <Grid item xs justify = "flex-start" direction = "column">
+                <Grid container >
+                    <Grid item xs /*justify = "flex-start" direction = "column"*/>
                         <strong id="fullname">{this.state.FullSelectedClass}</strong>
                     </Grid>
                     <Grid item xs = {3}>
