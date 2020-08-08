@@ -10,7 +10,7 @@ import ClassLinks from './class_links_FA2020'
 import TestCal from './TestCal'
 import moment from 'moment'
 import Moment from 'moment'
-import {extendMoment} from 'moment-range';
+import { extendMoment } from 'moment-range';
 import TextField from '@material-ui/core/TextField'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -91,7 +91,7 @@ export default class Scroller extends React.Component {
             ScheduledClasses: [],
 
             // container of displayed classes on sched/all classes on sched
-            selectedIntervals: [],
+            selectedIntervalz: [],
             allIntervals: [],
             allSelectedIntervals: [],
             timeIntervals: [],
@@ -107,12 +107,6 @@ export default class Scroller extends React.Component {
             // alert message
             no_overall_sections: "Oops! Couldn't add any ",
             some_overall_sections: "Oops! Couldn't add ",
-
-            // handles back button weird activity
-            //can_proceed: true,
-
-            // abort controllers
-            //controller: new AbortController(),
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -121,12 +115,145 @@ export default class Scroller extends React.Component {
         this.handleNext = this.handleNext.bind(this);
         this.handlePrev = this.handlePrev.bind(this);
         this.handleBack = this.handleBack.bind(this);
+        this.handleEvClick = this.handleEvClick.bind(this);
+        this.handleDisplay = this.handleDisplay.bind(this);
+        this.handleAdd = this.handleAdd.bind(this);
     }
 
     controller = new AbortController()
     //mySignal = this.controller.signal;
     is_loading = false;
     is_loading_btn = false;
+
+    componentDidMount = () => {
+        this.restoreLocalStorage()
+        let classname = this.state.CurrentSubj+this.state.SelectedClass;
+        this.fetchClassData(classname)
+        
+        window.addEventListener(
+            "beforeunload",
+            this.saveToLocalStorage.bind(this)
+        );
+    }
+
+    componentWillUnmount = () => {
+        window.removeEventListener(
+            "beforeunload",
+            this.saveToLocalStorage.bind(this)
+        );
+    
+        // saves if component has a chance to unmount
+        this.saveToLocalStorage();
+    }
+
+    handleMoments = (unformatted_selected) => {
+        for (let i = 0; i < unformatted_selected.length; ++i) {
+            let end_hr = moment(unformatted_selected[i]['end']).hours()
+            let end_day = moment(unformatted_selected[i]['end']).days()
+            let end_min = moment(unformatted_selected[i]['end']).minute()
+            let start_hr = moment(unformatted_selected[i]['start']).hours()
+            let start_day = moment(unformatted_selected[i]['start']).days()
+            let start_min = moment(unformatted_selected[i]['start']).minute()
+            unformatted_selected[i]['start'] = moment({h: start_hr, m: start_min}).day(start_day);
+            unformatted_selected[i]['end'] = moment({h: end_hr, m: end_min}).day(end_day);
+        }
+        return unformatted_selected;
+    }
+
+    handleAllSelectedMoments = (all_unformatted_selected) => {
+        for (let i = 0; i < all_unformatted_selected.length; ++i) {
+            for (let k = 0; k < all_unformatted_selected[i].length; ++k) {
+                let end_hr = moment(all_unformatted_selected[i][k]['end']).hours()
+                let end_day = moment(all_unformatted_selected[i][k]['end']).days()
+                let end_min = moment(all_unformatted_selected[i][k]['end']).minute()
+                let start_hr = moment(all_unformatted_selected[i][k]['start']).hours()
+                let start_day = moment(all_unformatted_selected[i][k]['start']).days()
+                let start_min = moment(all_unformatted_selected[i][k]['start']).minute()
+                all_unformatted_selected[i][k]['start'] = moment({h: start_hr, m: start_min}).day(start_day);
+                all_unformatted_selected[i][k]['end'] = moment({h: end_hr, m: end_min}).day(end_day);
+            }
+        }
+        return all_unformatted_selected
+    }
+
+    handleTimeInIntervals = (all_unformatted_intervals) => {
+        for (let i = 0; i < all_unformatted_intervals.length; ++i) {
+            for (let key in all_unformatted_intervals[i]) {
+                if (typeof all_unformatted_intervals[i][key] !== 'string') {
+                    for (let outer_i = 0; outer_i < all_unformatted_intervals[i][key].length; ++outer_i) {
+                        for (let inner_i = 0; inner_i < all_unformatted_intervals[i][key][outer_i].length; ++inner_i) {
+                            let end_hr = moment(all_unformatted_intervals[i][key][outer_i][inner_i]['end']).hours()
+                            console.log(end_hr)
+                            let end_day = moment(all_unformatted_intervals[i][key][outer_i][inner_i]['end']).days()
+                            let end_min = moment(all_unformatted_intervals[i][key][outer_i][inner_i]['end']).minute()
+                            let start_hr = moment(all_unformatted_intervals[i][key][outer_i][inner_i]['start']).hours()
+                            let start_day = moment(all_unformatted_intervals[i][key][outer_i][inner_i]['start']).days()
+                            let start_min = moment(all_unformatted_intervals[i][key][outer_i][inner_i]['start']).minute()
+                            all_unformatted_intervals[i][key][outer_i][inner_i]['start'] = moment({h: start_hr, m: start_min}).day(start_day);
+                            all_unformatted_intervals[i][key][outer_i][inner_i]['end'] = moment({h: end_hr, m: end_min}).day(end_day);
+                        }
+                    }
+                }
+            }
+        }
+        return all_unformatted_intervals
+    }
+
+    restoreLocalStorage = () => { 
+        // because of the way the moments from localstorage are stringified, the formatting gets super
+        // messed up and i have to call all these handle formatting functions in this function 
+
+        let unformatted_selected = JSON.parse(localStorage.getItem('selectedIntervalz'))
+        let all_unformatted_selected = JSON.parse(localStorage.getItem('allSelectedIntervals'))
+        let formatted_selected = []
+        if (unformatted_selected) {
+            formatted_selected = this.handleMoments(unformatted_selected)
+        }
+        let all_formatted_selected = []
+        if (all_unformatted_selected) {
+            all_formatted_selected = this.handleAllSelectedMoments(all_unformatted_selected)
+        }
+
+        let real_scheduled = []
+        if (JSON.parse(localStorage.getItem('ScheduledClasses'))) {
+            real_scheduled = JSON.parse(localStorage.getItem('ScheduledClasses'))
+        }
+
+        let real_all = []
+        let all_unformatted_intervals = JSON.parse(localStorage.getItem('allIntervals'))
+        if (all_unformatted_intervals) {
+            real_all = this.handleTimeInIntervals(all_unformatted_intervals)
+        }
+
+        let real_curr = 0
+        if (JSON.parse(localStorage.getItem('curr_index'))) {
+            real_curr = JSON.parse(localStorage.getItem('curr_index'))
+        }
+
+        let real_num = 1
+        if (JSON.parse(localStorage.getItem('numSchedules'))) {
+            real_num = JSON.parse(localStorage.getItem('numSchedules'))
+        }
+
+        this.setState({
+            ScheduledClasses: real_scheduled,
+            selectedIntervalz: formatted_selected,
+            allIntervals: real_all,
+            allSelectedIntervals: all_formatted_selected,
+            curr_index: real_curr,
+            numSchedules: real_num,
+        })
+    }
+    
+    saveToLocalStorage = () => {
+        // for every item in React state
+        localStorage.setItem('ScheduledClasses', JSON.stringify(this.state.ScheduledClasses))
+        localStorage.setItem('selectedIntervalz', JSON.stringify(this.state.selectedIntervalz))
+        localStorage.setItem('allIntervals', JSON.stringify(this.state.allIntervals))
+        localStorage.setItem('allSelectedIntervals', JSON.stringify(this.state.allSelectedIntervals))
+        localStorage.setItem('curr_index', JSON.stringify(this.state.curr_index))
+        localStorage.setItem('numSchedules', JSON.stringify(this.state.numSchedules))
+    }
 
     fetchClassData = async(classname) => {
         return await fetch(`${process.env.REACT_APP_SERVER_URL}/${classname}`, {signal: this.controller.signal})
@@ -136,13 +263,6 @@ export default class Scroller extends React.Component {
             .catch(error => {
                 console.error(error);
             })
-            //.then(class_info => {return class_info})
-    }
-
-    componentDidMount = () => {
-        console.log('hi')
-        let classname = this.state.CurrentSubj+this.state.SelectedClass;
-        this.fetchClassData(classname)
     }
     
     // handle returning the objects that are part of the dropdown menus
@@ -415,6 +535,7 @@ export default class Scroller extends React.Component {
                 return [new_all, true, classes_to_remove, forgotten_classes];
             }
         }
+        
     }
 
     // handle clicks on the scroller
@@ -680,7 +801,7 @@ export default class Scroller extends React.Component {
         let temp_scheduled = this.state.ScheduledClasses
         // seriously keeps track of all selected
         let temp_allSelectedIntervals = this.state.allSelectedIntervals
-
+        console.log(temp_allSelectedIntervals)  
         obj["class"] = this.state.CurrentSubj+this.state.SelectedClass;
         intervalObj["class"] = this.state.CurrentSubj+this.state.SelectedClass;
         // push all of the selected class info into the scheduled classes container in state
@@ -850,7 +971,7 @@ export default class Scroller extends React.Component {
             SelectedRecs: [],
             ScheduledClasses: temp_scheduled.concat(obj),
             allIntervals: temp_allintervals.concat(intervalObj),
-            selectedIntervals: temp_allSelectedIntervals[0],
+            selectedIntervalz: temp_allSelectedIntervals[0],
             allSelectedIntervals: temp_allSelectedIntervals,
             numSchedules: new_sched_size,
             curr_index: 0,
@@ -869,10 +990,10 @@ export default class Scroller extends React.Component {
         let filtered_scheds = []
         // remake all possible schedules
         for (let i = 0; i < new_array_all_intervals.length; ++i) {
-            if ('lecs' in new_array[i]) {
+            if (('lecs') in new_array[i]) {
                 let temp = this.update_selectedIntervals(filtered_scheds, new_array_all_intervals[i]['LEC'], "LEC")
                 filtered_scheds = temp[0]
-            }
+            }   
             if (('discs') in new_array[i]) {
                 let temp = this.update_selectedIntervals(filtered_scheds, new_array_all_intervals[i]['DIS'], "DIS")
                 filtered_scheds = temp[0]
@@ -892,6 +1013,7 @@ export default class Scroller extends React.Component {
         }
 
         if (filtered_scheds.length !== 0) {
+            console.log(filtered_scheds)
             new_selected_intervals = filtered_scheds[0]
             new_num_sched = filtered_scheds.length
         } else {
@@ -902,7 +1024,7 @@ export default class Scroller extends React.Component {
         this.setState({
             ScheduledClasses: new_array,
             allIntervals: new_array_all_intervals,
-            selectedIntervals: new_selected_intervals,
+            selectedIntervalz: new_selected_intervals,
             allSelectedIntervals: filtered_scheds,
             curr_index: 0,
             numSchedules: new_num_sched,
@@ -921,7 +1043,7 @@ export default class Scroller extends React.Component {
         }
         this.setState({
             curr_index: new_curr_index,
-            selectedIntervals: this.state.allSelectedIntervals[new_curr_index],
+            selectedIntervalz: this.state.allSelectedIntervals[new_curr_index],
         })
     }
 
@@ -935,7 +1057,7 @@ export default class Scroller extends React.Component {
         }
         this.setState({
             curr_index: new_curr_index,
-            selectedIntervals: this.state.allSelectedIntervals[new_curr_index],
+            selectedIntervalz: this.state.allSelectedIntervals[new_curr_index],
         })
     }
 
@@ -1170,6 +1292,11 @@ export default class Scroller extends React.Component {
         //some_overall_sections: "Oops! Couldn't add ",
         let no_alert;
         let some_alert;
+        let cal = <TestCal
+        selectedIntervals={this.state.selectedIntervalz}
+        onEventClick={this.handleEvClick}/>
+
+
         if (this.state.no_overall_sections !== "Oops! Couldn't add any ") {
             window.scrollTo(0, 0)
             no_alert = <Alert onClose={this.handleNoAlert} severity="error">
@@ -1463,9 +1590,10 @@ export default class Scroller extends React.Component {
                     {del_btn}
                 </div>
                 <div className = "right-div">
-                    <TestCal
-                    selectedIntervals={this.state.selectedIntervals}
-                    onEventClick={this.handleEvClick}/>
+                    {cal}
+                    {/*<TestCal
+                    selectedIntervals={this.state.selectedIntervalz}
+                    onEventClick={this.handleEvClick}/>*/}
                     {nextprev}
                 </div>
             </div>
