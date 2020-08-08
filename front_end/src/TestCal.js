@@ -21,6 +21,7 @@ export default class TestCal extends React.Component {
                 useModal={false}
                 selectedIntervals={this.props.selectedIntervals}
                 onEventClick={this.props.handleEvClick}
+                scaleFormat={'h:mm A'}
             />
         )
     }

@@ -1,7 +1,7 @@
 const request = require("request-promise")
 const cheerio = require("cheerio");
 
-const section_ten = ["AEROSP205","PHYSICS136", "PHYSICS141", "PHYSICS236"]
+const section_ten = ["AEROSP205","PHYSICS136", "PHYSICS141", "PHYSICS236", "MATH215"]
 const section_two = ["BIOLOGY120"]
 const section_ooo = ["CEE211", "CEE265", "CEE312", "CEE351", "CEE365", "CEE412", "CEE413"]
 // this gets the class info for a class in an easy to read format (open/closed data for all sections)
