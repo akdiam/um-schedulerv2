@@ -1,13 +1,26 @@
 const request = require("request-promise")
 const cheerio = require("cheerio");
 
+const section_ten = ["AEROSP205","PHYSICS136", "PHYSICS141", "PHYSICS236"]
+const section_two = ["BIOLOGY120"]
+const section_ooo = ["CEE211", "CEE265", "CEE312", "CEE351", "CEE365", "CEE412", "CEE413"]
 // this gets the class info for a class in an easy to read format (open/closed data for all sections)
 fos = (input) => (async() => {
     const class_name = input;
     let class_page = '';
     if (class_name.includes("CHEM")) {
         class_page =  `https://www.lsa.umich.edu/cg/cg_detail.aspx?content=2310${class_name}100&termArray=f_20_2310"`;
-    } else {
+    } 
+    if (section_ten.includes(class_name)) {
+        class_page = `https://www.lsa.umich.edu/cg/cg_detail.aspx?content=2310${class_name}010&termArray=f_20_2310"`
+    }
+    if (section_two.includes(class_name)) {
+        class_page = `https://www.lsa.umich.edu/cg/cg_detail.aspx?content=2310${class_name}002&termArray=f_20_2310"`
+    }
+    if (section_ooo.includes(class_name)) {
+        class_page = `https://www.lsa.umich.edu/cg/cg_detail.aspx?content=2310${class_name}101&termArray=f_20_2310"`
+    }
+    else {
         class_page = `https://www.lsa.umich.edu/cg/cg_detail.aspx?content=2310${class_name}001&termArray=f_20_2310"`;
     }
     
@@ -21,6 +34,7 @@ fos = (input) => (async() => {
         gzip: true, 
     });
     
+    console.log(response)
     // class_data contains all the enrollment data we need for each section of a specific class
     let class_data = []
     
