@@ -1295,7 +1295,7 @@ export default class Scroller extends React.Component {
         let cal = <TestCal
         selectedIntervals={this.state.selectedIntervalz}
         onEventClick={this.handleEvClick}/>
-
+        // sdsd
 
         if (this.state.no_overall_sections !== "Oops! Couldn't add any ") {
             window.scrollTo(0, 0)
