@@ -38,8 +38,6 @@ const spacingStyle = {
 }
 
 const animatedComponents = makeAnimated();
-
-let can_go_back = true;
 export default class Scroller extends React.Component {
     constructor(props) {
         super(props);
@@ -109,6 +107,12 @@ export default class Scroller extends React.Component {
             // alert message
             no_overall_sections: "Oops! Couldn't add any ",
             some_overall_sections: "Oops! Couldn't add ",
+
+            // handles back button weird activity
+            //can_proceed: true,
+
+            // abort controllers
+            //controller: new AbortController(),
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -116,16 +120,27 @@ export default class Scroller extends React.Component {
         this.handleBack = this.handleBack.bind(this);
         this.handleNext = this.handleNext.bind(this);
         this.handlePrev = this.handlePrev.bind(this);
+        this.handleBack = this.handleBack.bind(this);
     }
 
+    controller = new AbortController()
+    //mySignal = this.controller.signal;
+    is_loading = false;
+    is_loading_btn = false;
+
     fetchClassData = async(classname) => {
-        return await fetch(`${process.env.REACT_APP_SERVER_URL}/${classname}`)
+        return await fetch(`${process.env.REACT_APP_SERVER_URL}/${classname}`, {signal: this.controller.signal})
             .then(res => {
               return res.json()
             })
+            .catch(error => {
+                console.error(error);
+            })
             //.then(class_info => {return class_info})
     }
+
     componentDidMount = () => {
+        console.log('hi')
         let classname = this.state.CurrentSubj+this.state.SelectedClass;
         this.fetchClassData(classname)
     }
@@ -431,11 +446,17 @@ export default class Scroller extends React.Component {
                 FilteredClassList: filtered_classes,
                 CompleteClassList: relevant_classes,
                 current_search: '',
+                //can_proceed: true,
             })
         } 
         //let class_num = event.currentTarget.id;
         // if the user clicks on a class...
         if (this.state.showClassList) {
+            if (this.is_loading) {
+                this.controller.abort()
+                this.controller = new AbortController()
+            }
+
             let specific_class_list = this.state.CompleteClassList.filter(subj => subj['Catalog Nbr'] === event.currentTarget.id)
             const lecs = specific_class_list.filter(subj => subj['Component'] === 'LEC')
             const discs = specific_class_list.filter(subj => subj['Component'] === 'DIS')
@@ -457,66 +478,67 @@ export default class Scroller extends React.Component {
 
             // wait until this is done, then proceed with the rest of the logic (await)
             // this fetches all of the open/close data from the course guide
-            can_go_back = false;
-            await this.fetchClassData(this.state.CurrentSubj+class_num.trim())
+
+            this.is_loading = true;
+            await this.fetchClassData(this.state.CurrentSubj+class_num.trim(), { signal: this.controller.signal })
                 .then(class_data => {
                     openclose_temp.push(class_data);
                 }); 
+            console.log(openclose_temp[0])
+            this.is_loading = false;
             
-
-            can_go_back = true;
-            //console.table(openclose_temp[0])
-            let real_openclose = openclose_temp[0]
-        
-            // gathering info to send to dropdown menus to display
-            for (let i = 0; i < lecs.length; ++i) {
-                let disp_obj = this.handleDisplay(lecs[i], real_openclose)
-                temp_lec.push(disp_obj);
-            }
-            for (let i = 0; i < discs.length; ++i) {
-                let disp_obj = this.handleDisplay(discs[i], real_openclose)
-                temp_disc.push(disp_obj);
-            }
-            for (let i = 0; i < labs.length; ++i) {
-                let disp_obj = this.handleDisplay(labs[i], real_openclose)
-                temp_lab.push(disp_obj);
-            }
-            for (let i = 0; i < sems.length; ++i) {
-                let disp_obj = this.handleDisplay(sems[i], real_openclose)
-                temp_sems.push(disp_obj);
-            }
-            for (let i = 0; i < recs.length; ++i) {
-                let disp_obj = this.handleDisplay(recs[i], real_openclose)
-                temp_recs.push(disp_obj);
-            }
-
-            // update state
-            this.setState({
-                showClassList: true,
-                showCourseDesc: true,
-                LecArray: lecs,
-                DiscArray: discs,
-                LabArray: labs,
-                SemArray: sems,
-                RecArray: recs,
-                SelectedClass: class_num,
-                SpecificClassList: specific_class_list,
-                LecDisplays: temp_lec,
-                DiscDisplays: temp_disc,
-                LabDisplays: temp_lab,
-                SemDisplays: temp_sems,
-                RecDisplays: temp_recs,
-                FullSelectedClass: class_name,
-                SelectedLecs: [],
-                SelectedDiscs: [],
-                SelectedLabs: [],
-                SelectedSems: [],
-                SelectedRecs: [],
-                openClosedDisplays: openclose_temp[0],
-                show_desc: true,
-                no_overall_sections: "Oops! Couldn't add any ",
-                some_overall_sections: "Oops! Couldn't add ",
-            })
+            if (openclose_temp[0]) {
+                let real_openclose = openclose_temp[0]
+            
+                // gathering info to send to dropdown menus to display
+                for (let i = 0; i < lecs.length; ++i) {
+                    let disp_obj = this.handleDisplay(lecs[i], real_openclose)
+                    temp_lec.push(disp_obj);
+                }
+                for (let i = 0; i < discs.length; ++i) {
+                    let disp_obj = this.handleDisplay(discs[i], real_openclose)
+                    temp_disc.push(disp_obj);
+                }
+                for (let i = 0; i < labs.length; ++i) {
+                    let disp_obj = this.handleDisplay(labs[i], real_openclose)
+                    temp_lab.push(disp_obj);
+                }
+                for (let i = 0; i < sems.length; ++i) {
+                    let disp_obj = this.handleDisplay(sems[i], real_openclose)
+                    temp_sems.push(disp_obj);
+                }
+                for (let i = 0; i < recs.length; ++i) {
+                    let disp_obj = this.handleDisplay(recs[i], real_openclose)
+                    temp_recs.push(disp_obj);
+                }
+                // update state
+                this.setState({
+                    showClassList: true,
+                    showCourseDesc: true,
+                    LecArray: lecs,
+                    DiscArray: discs,
+                    LabArray: labs,
+                    SemArray: sems,
+                    RecArray: recs,
+                    SelectedClass: class_num,
+                    SpecificClassList: specific_class_list,
+                    LecDisplays: temp_lec,
+                    DiscDisplays: temp_disc,
+                    LabDisplays: temp_lab,
+                    SemDisplays: temp_sems,
+                    RecDisplays: temp_recs,
+                    FullSelectedClass: class_name,
+                    SelectedLecs: [],
+                    SelectedDiscs: [],
+                    SelectedLabs: [],
+                    SelectedSems: [],
+                    SelectedRecs: [],
+                    openClosedDisplays: openclose_temp[0],
+                    show_desc: true,
+                    no_overall_sections: "Oops! Couldn't add any ",
+                    some_overall_sections: "Oops! Couldn't add ",
+                })
+            } 
         } 
     }
 
@@ -538,41 +560,43 @@ export default class Scroller extends React.Component {
 
     // backkkkkkkk
     handleBack = () => {
-        if (can_go_back) {
-            this.setState({
-                showSubjs: true,
-                showClassDesc: false,
-                showClassList: false,
-                showCourseDesc: false,
-                FullSelectedClass: null,
-                SelectedLecs: [],
-                SelectedDiscs: [],
-                SelectedLabs: [],
-                SelectedSems: [],
-                SelectedRecs: [],
-                LecDisplays: null,
-                DiscDisplays: null,
-                LabDisplays: null,
-                SemDisplays: null,
-                RecDisplays: null,
-                FullSelectedClass: null,
-                SpecificClassList: null,
-                CurrentSubj: null,
-                FilteredClassList: null,
-                CompleteClassList: null,
-                SpecificClassList: null,
-                SelectedClass: null,
-                LecArray: [],
-                DiscArray: [],
-                LabArray: [],
-                SemArray: [],
-                RecArray: [],
-                current_search: '',
-                show_desc: true,
-                no_overall_sections: "Oops! Couldn't add any ",
-                some_overall_sections: "Oops! Couldn't add ",
-            })
-        }
+        this.controller.abort()
+        this.controller = new AbortController()
+        this.setState({
+            showSubjs: true,
+            showClassDesc: false,
+            showClassList: false,
+            showCourseDesc: false,
+            FullSelectedClass: null,
+            SelectedLecs: [],
+            SelectedDiscs: [],
+            SelectedLabs: [],
+            SelectedSems: [],
+            SelectedRecs: [],
+            LecDisplays: null,
+            DiscDisplays: null,
+            LabDisplays: null,
+            SemDisplays: null,
+            RecDisplays: null,
+            FullSelectedClass: null,
+            SpecificClassList: null,
+            CurrentSubj: null,
+            FilteredClassList: null,
+            CompleteClassList: null,
+            SpecificClassList: null,
+            SelectedClass: null,
+            LecArray: [],
+            DiscArray: [],
+            LabArray: [],
+            SemArray: [],
+            RecArray: [],
+            current_search: '',
+            show_desc: false,
+            no_overall_sections: "Oops! Couldn't add any ",
+            some_overall_sections: "Oops! Couldn't add ",
+            //can_proceed: false,
+        })
+        
     }
 
     // deletes classes that are no longer available (because of conflicts) from allIntervals
@@ -917,6 +941,11 @@ export default class Scroller extends React.Component {
 
     // if a user clicks on a class button
     handleEvClick = async(event) => {
+        if (this.is_loading_btn) {
+            this.controller.abort()
+            this.controller = new AbortController()
+        }
+
         // get complete_class_list
         let inner_text = event.target.innerText.replace(/[0-9]/g, '').trim()
         let subj_to_find = '(' + inner_text + ')';
@@ -951,67 +980,71 @@ export default class Scroller extends React.Component {
 
         // wait until this is done, then proceed with the rest of the logic (await)
         // this fetches all of the open/close data from the course guide
-        can_go_back = false;
-        await this.fetchClassData(inner_text+inner_num)
+        this.is_loading_btn = true;
+        await this.fetchClassData(inner_text+inner_num, {signal: this.controller.signal})
             .then(class_data => {
                 openclose_temp.push(class_data);
             }); 
-        can_go_back = true;
-
-        let real_openclose = openclose_temp[0]
+        this.is_loading_btn = false;
+        
+        if (openclose_temp[0]) {
+            let real_openclose = openclose_temp[0]
     
-        // gathering info to send to dropdown menus to display
-        for (let i = 0; i < lecs.length; ++i) {
-            let disp_obj = this.handleDisplay(lecs[i], real_openclose)
-            temp_lec.push(disp_obj);
+            // gathering info to send to dropdown menus to display
+            for (let i = 0; i < lecs.length; ++i) {
+                let disp_obj = this.handleDisplay(lecs[i], real_openclose)
+                temp_lec.push(disp_obj);
+            }
+            for (let i = 0; i < discs.length; ++i) {
+                let disp_obj = this.handleDisplay(discs[i], real_openclose)
+                temp_disc.push(disp_obj);
+            }
+            for (let i = 0; i < labs.length; ++i) {
+                let disp_obj = this.handleDisplay(labs[i], real_openclose)
+                temp_lab.push(disp_obj);
+            }
+            for (let i = 0; i < sems.length; ++i) {
+                let disp_obj = this.handleDisplay(sems[i], real_openclose)
+                temp_sems.push(disp_obj);
+            }
+            for (let i = 0; i < recs.length; ++i) {
+                let disp_obj = this.handleDisplay(recs[i], real_openclose)
+                temp_recs.push(disp_obj);
+            }
+            let full_class_name = inner_text + " " + inner_num + ": " + description
+            full_class_name = full_class_name.toUpperCase()
+            this.setState({
+                showSubjs: false,
+                showClassList: true,
+                showCourseDesc: true,
+                CurrentSubj: inner_text,
+                FilteredClassList: filtered_classes,
+                CompleteClassList: relevant_classes,
+                LecArray: lecs,
+                DiscArray: discs,
+                LabArray: labs,
+                SemArray: sems,
+                RecArray: recs,
+                SelectedClass: " "+inner_num,
+                SpecificClassList: specific_class_list,
+                LecDisplays: temp_lec,
+                DiscDisplays: temp_disc,
+                LabDisplays: temp_lab,
+                SemDisplays: temp_sems,
+                RecDisplays: temp_recs,
+                FullSelectedClass: full_class_name,
+                SelectedLecs: [],
+                SelectedDiscs: [],
+                SelectedLabs: [],
+                SelectedSems: [],
+                SelectedRecs: [],
+                show_desc: true,
+                openClosedDisplays: openclose_temp[0],
+                no_overall_sections: "Oops! Couldn't add any ",
+                some_overall_sections: "Oops! Couldn't add ",
+            })
         }
-        for (let i = 0; i < discs.length; ++i) {
-            let disp_obj = this.handleDisplay(discs[i], real_openclose)
-            temp_disc.push(disp_obj);
-        }
-        for (let i = 0; i < labs.length; ++i) {
-            let disp_obj = this.handleDisplay(labs[i], real_openclose)
-            temp_lab.push(disp_obj);
-        }
-        for (let i = 0; i < sems.length; ++i) {
-            let disp_obj = this.handleDisplay(sems[i], real_openclose)
-            temp_sems.push(disp_obj);
-        }
-        for (let i = 0; i < recs.length; ++i) {
-            let disp_obj = this.handleDisplay(recs[i], real_openclose)
-            temp_recs.push(disp_obj);
-        }
-        let full_class_name = inner_text + " " + inner_num + ": " + description
-        full_class_name = full_class_name.toUpperCase()
-        this.setState({
-            showSubjs: false,
-            showClassList: true,
-            showCourseDesc: true,
-            CurrentSubj: inner_text,
-            FilteredClassList: filtered_classes,
-            CompleteClassList: relevant_classes,
-            LecArray: lecs,
-            DiscArray: discs,
-            LabArray: labs,
-            SemArray: sems,
-            RecArray: recs,
-            SelectedClass: " "+inner_num,
-            SpecificClassList: specific_class_list,
-            LecDisplays: temp_lec,
-            DiscDisplays: temp_disc,
-            LabDisplays: temp_lab,
-            SemDisplays: temp_sems,
-            RecDisplays: temp_recs,
-            FullSelectedClass: full_class_name,
-            SelectedLecs: [],
-            SelectedDiscs: [],
-            SelectedLabs: [],
-            SelectedSems: [],
-            SelectedRecs: [],
-            openClosedDisplays: openclose_temp[0],
-            no_overall_sections: "Oops! Couldn't add any ",
-            some_overall_sections: "Oops! Couldn't add ",
-        })
+        
 
     }
 
@@ -1232,7 +1265,7 @@ export default class Scroller extends React.Component {
             <Button variant="contained" size="small" onClick={this.handleBack} color="secondary" id="back">
                 Back to Subjects
             </Button>
-            
+
             let description = ClassDescs[this.state.CurrentSubj].filter(subj => subj['num'] === parseInt(this.state.SelectedClass))
             
             if (this.state.show_desc) {
