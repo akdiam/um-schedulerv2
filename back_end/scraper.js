@@ -7,7 +7,8 @@ const section_ooo = ["CEE211", "CEE265", "CEE312", "CEE351", "CEE365", "CEE412",
 // this gets the class info for a class in an easy to read format (open/closed data for all sections)
 fos = (input) => (async() => {
     const class_name = input;
-    let class_page = '';
+    let class_page = `https://www.lsa.umich.edu/cg/cg_detail.aspx?content=2310${class_name}001&termArray=f_20_2310"`;
+    //let class_page = '';
     if (class_name.includes("CHEM")) {
         class_page =  `https://www.lsa.umich.edu/cg/cg_detail.aspx?content=2310${class_name}100&termArray=f_20_2310"`;
     } 
@@ -19,9 +20,6 @@ fos = (input) => (async() => {
     }
     if (section_ooo.includes(class_name)) {
         class_page = `https://www.lsa.umich.edu/cg/cg_detail.aspx?content=2310${class_name}101&termArray=f_20_2310"`
-    }
-    else {
-        class_page = `https://www.lsa.umich.edu/cg/cg_detail.aspx?content=2310${class_name}001&termArray=f_20_2310"`;
     }
     
     const response = await request({

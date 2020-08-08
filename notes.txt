@@ -2,6 +2,8 @@
 *default to expanded info section DONE
 *add an about section to explain how the app works DONE?
 *fix conflict handling DONE
-*credit counter
-*when 'enter' is pressed on the search bar the page reloads
+*when 'enter' is pressed on the search bar the page reloads DONE
+*localstorage DONE
+
 *add spinner
+*credit counter
