@@ -32,8 +32,8 @@ Hopefully next semester's information will be a little more complete, but for no
 
 I used React for the front end, and Node/Express for the back end. I also used Python to scrape the class descriptions from the LSA course guide, as well as to generate the links to each class's course guide page and each class's ATLAS page.
 
-## 💣 Issues
+## 💣 Difficulties
 
 This was my first project in JS let alone React, so there was a lot to learn, and the structure of this project kinda reflects this. However, I did learn a ton and will take what I learned into whatever project comes up next 🔛🔝🔜✔️
 
-If you'd like to see some of my notes about issues that I've come across in this project, check out 'notes.txt' in the home directory!
+If you'd like to see some of my notes about difficulties that I've come across in this project, check out 'notes.txt' in the home directory!
