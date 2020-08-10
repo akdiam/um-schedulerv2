@@ -1249,7 +1249,7 @@ export default class Scroller extends React.Component {
     }
 
     showSource = () => {
-        window.open('https://github.com/akdiam/um-schedulerv2')
+        window.open('https://github.com/akdiam/um-schedulerv2#%EF%B8%8F-umscheduler')
     }
 
     handleNoAlert = () => {
@@ -1621,7 +1621,7 @@ export default class Scroller extends React.Component {
                     <div id="top-row">
                         <h3 style={{textAlign:'center'}}>umscheduler</h3>
                         <p id="blurb">schedule building made easy</p>
-                        <Button variant="outlined" color="primary" startIcon={<HelpIcon/>} onClick={this.showSource}>Help me!</Button>
+                        <Button variant="outlined" color="primary" startIcon={<HelpIcon/>} onClick={this.showSource}>Help me</Button>
                     </div>
                     
                     {search_bar}
