@@ -1,9 +1,57 @@
-*regex searches ex: 'musicol' returns a valid subject, but 'musicology' doesn't
 *default to expanded info section DONE
+
 *add an about section to explain how the app works DONE?
+
 *fix conflict handling DONE
+    - difficulties:
+        -figuring out how to structure the way i'd calculate if a section(s) couldn't be added
+            .ended up doing this:
+                1. iterate over every 'potential' class
+                2. within same loop, iterate over the entire current list of 'allselectedintervals'
+                3. if there is a conflict, flag it with a boolean
+                4. after each iteration in the list of 'allselectedintervals', if there was a conflict with
+                the current 'potential' class, increment a counter called inner
+                5. after iterating through all 'allselectedintervals', if inner.length === allselectedintervals.length,
+                we know we can't add the 'potential' class. add it to a ds called remove and increment another counter called outer
+                6. after iterating through every 'potential', if outer === num of 'potentials', we can't add 
+                any sections of that particular type and that info is returned
+                7. otherwise, we can either add a portion of the sections the user added, or all of them, depending
+                on how many conflicts were flagged in the above steps
+
 *when 'enter' is pressed on the search bar the page reloads DONE
+    .window.preventdefault()
+
 *localstorage DONE
+    - difficulties: 
+        -the biggest was that the stringified moment objects got parsed to UTC time when entering localstorage
+        and this created every single (seemingly unrelated) error/warning that popped up
+            .ended up having to write some helper functions to handle this in all three structures where moment objects were stored
+        -debugging the above took a really long time - i couldn't figure out what was wrong at first
+
+*ampm instead of 24h DONE
+    - difficulties:
+        -going through a lot of code i haven't understood for the longest time in the week-calendar module
+        -figuring out how to patch the module i modified so that the changes persist in production
+            .patch-package
+
+*huge crashes when spamming buttons and then immediately going back/going back before fetch call is done
+    - why: when i pressed 'back', the state wipes the majority of its content. sometimes, if 'back' 
+    was pressed before some content was finished loading, the function that used fetch would continue and run 
+    into a piece of state that had already been wiped, throwing an error 
+    - difficulties: 
+        -trying a bunch of things that didn't work on their own, like...
+            -adding conditional variables before and after the fetch calls each time it was called
+            -adding abort controller 
+                .the fix was a combination of the two - while fetching, set a conditional bool 'is_loading' to true.
+                if another fetch call is made while 'is_loading' is true, abort the prev call with abortcontroller
+            -abortcontroller was cancelling every single request, even if 'is_loading' was false
+                .this was happening because i was using the same abortcontroller every time. fixed by removing 
+                abortcontroller from the state and dedicating it as a variable within the class instead so that it 
+                could refresh itself each time a request was cancelled
+
+*add section incompatibilities
+    -this was the most tedious part of this entire project - i had to go through every class on my site 
+    and see which ones had restrictions in terms of which discussions/labs could go with which lectures
 
 *add spinner
 *credit counter

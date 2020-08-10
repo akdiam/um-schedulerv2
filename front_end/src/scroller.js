@@ -8,6 +8,7 @@ import ClassListing from './FA2020';
 import ClassDescs from './class_descs_FA2020'
 import ClassLinks from './class_links_FA2020'
 import TestCal from './TestCal'
+import {EdgeCases} from './edge_cases'
 import moment from 'moment'
 import Moment from 'moment'
 import { extendMoment } from 'moment-range';
@@ -183,7 +184,6 @@ export default class Scroller extends React.Component {
                     for (let outer_i = 0; outer_i < all_unformatted_intervals[i][key].length; ++outer_i) {
                         for (let inner_i = 0; inner_i < all_unformatted_intervals[i][key][outer_i].length; ++inner_i) {
                             let end_hr = moment(all_unformatted_intervals[i][key][outer_i][inner_i]['end']).hours()
-                            console.log(end_hr)
                             let end_day = moment(all_unformatted_intervals[i][key][outer_i][inner_i]['end']).days()
                             let end_min = moment(all_unformatted_intervals[i][key][outer_i][inner_i]['end']).minute()
                             let start_hr = moment(all_unformatted_intervals[i][key][outer_i][inner_i]['start']).hours()
@@ -455,15 +455,40 @@ export default class Scroller extends React.Component {
         return forgotten_classes
     }
 
+    // return true if this is an edgecase, return false otherwise
+    // class one is the lec, class two is the dis/lab
+    is_edgecase = (class_one, class_two) => {
+        let one_uid = class_one['uid']
+        let two_uid = class_two['uid']
+        if (one_uid !== two_uid) {
+            return false
+        }
+        if (!(one_uid in EdgeCases)) {
+            return false
+        }
+        if (one_uid in EdgeCases) {
+            for (let key in EdgeCases[one_uid]) {
+                // if val of class one includes 'lec 010' or whatever
+                if (class_one['value'].includes(key)) {
+                    for (let i = 0; i < EdgeCases[one_uid][key].length; ++i) {
+                        if (class_two['value'].includes(EdgeCases[one_uid][key][i])) {
+                            return false
+                        }
+                    }   
+                }
+            }
+        } 
+        return true
+    }
+
     // add to array of all selectedIntervals 
     update_selectedIntervals = (all_schedules, interval_obj, type) => {
         let conflict_counter = 0;
+        let edgecase_counter = 0;
         let missing_classes = '';
         let classes_to_remove = [];
         let unadded = []
         let forgotten_classes = []
-        //let noconflict_counter = 0;
-        // set up selected intervals
         let new_all = []
         if (interval_obj.length === 0) {
             return [all_schedules, true, classes_to_remove, forgotten_classes]
@@ -485,9 +510,11 @@ export default class Scroller extends React.Component {
             for (let k = 0; k < interval_obj.length; ++k) {
                 //(allSelectedIntervals)
                 let inner_conflict_counter = 0;
+                let inner_edgecase_counter = 0;
                 for (let i = 0; i < all_schedules.length; ++i) {
                     // over each specific selectedInterval
                     let has_conflict = false;
+                    let has_edgecase = false;
                     for (let j = 0; j < all_schedules[i].length; ++j) {
                         // over each time interval within the interval_obj
                         for (let h = 0; h < interval_obj[k].length; ++h) {
@@ -495,21 +522,33 @@ export default class Scroller extends React.Component {
                                                     interval_obj[k][h]['start'], interval_obj[k][h]['end'])) {
                                 has_conflict = true;
                             } 
+                            if (this.is_edgecase(all_schedules[i][j], interval_obj[k][h])) {
+                                has_edgecase = true;
+                            }
                         }
                     } 
-                    if (!has_conflict) {
+                    if (!has_conflict && !has_edgecase) {
                         let concatted_sched = all_schedules[i].concat(interval_obj[k])
                         new_all.push(concatted_sched)
                         //++noconflict_counter
                     } 
                     else {
-                        ++inner_conflict_counter
-                        for (let o = 0; o < all_schedules[i].length; ++o) {
-                            if (!(all_schedules[i][o]['value'] in unadded)) {
-                                unadded.push(all_schedules[i][o]['value'])
+                        if (has_conflict) {
+                            ++inner_conflict_counter
+                            for (let o = 0; o < all_schedules[i].length; ++o) {
+                                if (!(all_schedules[i][o]['value'] in unadded)) {
+                                    unadded.push(all_schedules[i][o]['value'])
+                                }
                             }
                         }
-                        //can_add = false;
+                        if (has_edgecase) {
+                            ++inner_edgecase_counter
+                            for (let o = 0; o < all_schedules[i].length; ++o) {
+                                if (!(all_schedules[i][o]['value'] in unadded)) {
+                                    unadded.push(all_schedules[i][o]['value'])
+                                }
+                            }
+                        }
                     }
                 }
                 if (inner_conflict_counter === all_schedules.length) {
@@ -519,15 +558,21 @@ export default class Scroller extends React.Component {
                         classes_to_remove.push(interval_obj[k][0]['value'])
                     }
                 } 
+                if (inner_edgecase_counter === all_schedules.length) {
+                    ++edgecase_counter
+                    if (!missing_classes.includes(interval_obj[k][0]['value'])) {
+                        missing_classes += (interval_obj[k][0]['value'] + ', ')
+                        classes_to_remove.push(interval_obj[k][0]['value'])
+                    }
+                }
             }
         }
-        if (conflict_counter === interval_obj.length) {
+        if (conflict_counter === interval_obj.length || edgecase_counter === interval_obj.length) {
             //alert(`Couldn't add any ${type} that you selected to your schedule because all brought conflicts`)
             return [all_schedules, false, classes_to_remove, forgotten_classes];
         } 
         else {
             forgotten_classes = this.check_forgotten(unadded, new_all)
-
             if (missing_classes.length === 0) {
                 return [new_all, true, classes_to_remove, forgotten_classes];
             } else {
@@ -535,7 +580,6 @@ export default class Scroller extends React.Component {
                 return [new_all, true, classes_to_remove, forgotten_classes];
             }
         }
-        
     }
 
     // handle clicks on the scroller
@@ -605,12 +649,11 @@ export default class Scroller extends React.Component {
                 .then(class_data => {
                     openclose_temp.push(class_data);
                 }); 
-            console.log(openclose_temp[0])
             this.is_loading = false;
             
             if (openclose_temp[0]) {
                 let real_openclose = openclose_temp[0]
-            
+                
                 // gathering info to send to dropdown menus to display
                 for (let i = 0; i < lecs.length; ++i) {
                     let disp_obj = this.handleDisplay(lecs[i], real_openclose)
@@ -722,21 +765,13 @@ export default class Scroller extends React.Component {
 
     // deletes classes that are no longer available (because of conflicts) from allIntervals
     // called in handleAdd()
-    deleteIntervals = (temp_allintervals, forgotten) => {
-        // remove duplicates
-        let forgotten_nodupes = []
-        for (let i = 0; i < forgotten.length; ++i) {
-            if (!(forgotten_nodupes.includes(forgotten[i]))) {
-                forgotten_nodupes.push(forgotten[i])
-            }
-        }
+    deleteIntervals = (temp_allintervals, forgotten_nodupes) => {
 
         // takes in (forgotten_nodupes), which is an array of classes that are no longer in schedules after this add
         for (let k=0; k<forgotten_nodupes.length; ++k) {
             for (let i=0; i<temp_allintervals.length; ++i) {
                 // filter all classes that aren't in forgotten_nodupes
                 if ('LEC' in temp_allintervals[i]) {
-                    console.log(temp_allintervals[i]['class'])
                     temp_allintervals[i]['LEC'] = temp_allintervals[i]['LEC'].filter(subj => subj[0]['value'] !== forgotten_nodupes[k])
                 }
                 if ('DIS' in temp_allintervals[i]) {
@@ -758,13 +793,7 @@ export default class Scroller extends React.Component {
 
     // deletes classes that are no longer available (because of conflicts) from ScheduledClasses
     // called in handleAdd()
-    deleteScheduled = (temp_scheduled, forgotten) => {
-        let forgotten_nodupes = []
-        for (let i = 0; i < forgotten.length; ++i) {
-            if (!(forgotten_nodupes.includes(forgotten[i]))) {
-                forgotten_nodupes.push(forgotten[i])
-            }
-        }
+    deleteScheduled = (temp_scheduled, forgotten_nodupes) => {
 
         for (let k=0; k<forgotten_nodupes.length; ++k) {
             for (let i=0; i<temp_scheduled.length; ++i) {
@@ -788,6 +817,20 @@ export default class Scroller extends React.Component {
         return temp_scheduled
     }
 
+    deleteMetaIntervalObj = (intervalObj, indiv_forgotten) => {
+        if ('LEC' in intervalObj) {
+            intervalObj['LEC'] = intervalObj['LEC'].filter(subj => subj[0]['value'] !== indiv_forgotten)
+        }
+        return intervalObj
+    }
+
+    deleteMetaObj = (obj, indiv_forgotten) => {
+        if ('lecs' in obj) {
+            obj['lecs'] = obj['lecs'].filter(subj => indiv_forgotten.includes(subj['description']['value'].toString()) === false)
+        }
+        return obj
+    }
+
     // adds selected values to an array called ScheduledClasses
     handleAdd = () => {
         // add all of the selected options to the calendar display array
@@ -801,7 +844,6 @@ export default class Scroller extends React.Component {
         let temp_scheduled = this.state.ScheduledClasses
         // seriously keeps track of all selected
         let temp_allSelectedIntervals = this.state.allSelectedIntervals
-        console.log(temp_allSelectedIntervals)  
         obj["class"] = this.state.CurrentSubj+this.state.SelectedClass;
         intervalObj["class"] = this.state.CurrentSubj+this.state.SelectedClass;
         // push all of the selected class info into the scheduled classes container in state
@@ -954,6 +996,19 @@ export default class Scroller extends React.Component {
         // removes 'forgotten' classes (that don't exist anymore because of conflicts)
         // from allIntervals and ScheduledClasses
         if (forgotten.length !== 0) {
+            let forgotten_nodupes = []
+            for (let i = 0; i < forgotten.length; ++i) {
+                if (!(forgotten_nodupes.includes(forgotten[i]))) {
+                    forgotten_nodupes.push(forgotten[i])
+                }
+            }
+
+            for (let i = 0; i < forgotten_nodupes.length; ++i) {
+                if (forgotten_nodupes[i].includes(this.state.CurrentSubj+this.state.SelectedClass)) {
+                    intervalObj = this.deleteMetaIntervalObj(intervalObj, forgotten_nodupes[i])
+                    obj = this.deleteMetaObj(obj, forgotten_nodupes[i])
+                }
+            }
             temp_allintervals = this.deleteIntervals(temp_allintervals, forgotten)
             temp_scheduled = this.deleteScheduled(temp_scheduled, forgotten)
         }
@@ -1013,7 +1068,6 @@ export default class Scroller extends React.Component {
         }
 
         if (filtered_scheds.length !== 0) {
-            console.log(filtered_scheds)
             new_selected_intervals = filtered_scheds[0]
             new_num_sched = filtered_scheds.length
         } else {
@@ -1300,13 +1354,15 @@ export default class Scroller extends React.Component {
         if (this.state.no_overall_sections !== "Oops! Couldn't add any ") {
             window.scrollTo(0, 0)
             no_alert = <Alert onClose={this.handleNoAlert} severity="error">
-                {this.state.no_overall_sections}from {this.state.FullSelectedClass} because all of these create conflict with your current schedule(s). Consider rearranging your schedule, or adding other sections if possible!
+                {this.state.no_overall_sections}from {this.state.FullSelectedClass} because all of these create conflict with your current schedule(s). 
+                This could be because of either time conflicts or section number incompatiblities. Check the course guide if you're unsure of this class's section compatibilities.
                 </Alert>
         }
         if (this.state.some_overall_sections !== "Oops! Couldn't add ") {
             window.scrollTo(0, 0)
             some_alert = <Alert onClose={this.handleSomeAlert} severity="warning">
-                {this.state.some_overall_sections}because all of these sections create conflict with your current schedule(s). Consider rearranging your schedule, or adding other sections if possible!
+                {this.state.some_overall_sections}because all of these sections create conflict with your current schedule(s). 
+                This could be because of either time conflicts or section number incompatiblities. Check the course guide if you're unsure of this class's section compatibilities.
                 </Alert>
         }
         
@@ -1591,9 +1647,6 @@ export default class Scroller extends React.Component {
                 </div>
                 <div className = "right-div">
                     {cal}
-                    {/*<TestCal
-                    selectedIntervals={this.state.selectedIntervalz}
-                    onEventClick={this.handleEvClick}/>*/}
                     {nextprev}
                 </div>
             </div>
