@@ -11,10 +11,11 @@ Thanks for checking out umscheduler! Here's a little info that'll help you get t
 4. To see which sections you've chosen to add to each class, hover your mouse over the class buttons directly beneath the search bar
 
 ## 🦴 Core features
-1. umscheduler will automatically detect any conflicts that you have, let you know what they are, and adjust your possible schedules accordingly. **You will never see any time conflicts in any of your schedules**. 
-2. umscheduler also takes specific section restrictions into account. For example, for CHEM 130, students registered for Lecture 100 will only be able to register for Discussions 1XX, those registered for Lecture 200 will only be able to register for Discussions 2XX, and so on. There are a lot of really weird ones in the course catalog, but umscheduler takes care of most of them to give you the most accurate possible schedules.
-3. Sections that already exist in your list of possible schedules may be silently removed in order to make room for classes you want to add next. However, for any of the classes you've chosen, **there will always be at least one of each section (lec, lab, dis, etc.) remaining per class**. In other words, no class that you add will ever be 'deleted', unless you explicitly delete it yourself. 
-4. It's really fun to click through your schedules really fast 
+1. First and foremost, umscheduler is a scheduler generator that gives you **all possible schedules** based on the sections you choose, as well as some constraints listed below
+2. umscheduler will automatically detect any conflicts that you have, let you know what they are, and adjust your possible schedules accordingly. **You will never see any time conflicts in any of your schedules**. 
+3. umscheduler also takes specific section restrictions into account. For example, for CHEM 130, students registered for Lecture 100 will only be able to register for Discussions 1XX, those registered for Lecture 200 will only be able to register for Discussions 2XX, and so on. There are a lot of really weird ones in the course catalog, but umscheduler takes care of most of them to give you the most accurate possible schedules.
+4. Sections that already exist in your list of possible schedules may be silently removed in order to make room for classes you want to add next. However, for any of the classes you've chosen, **there will always be at least one of each section (lec, lab, dis, etc.) remaining per class**. In other words, no class that you add will ever be 'deleted', unless you explicitly delete it yourself. 
+5. It's really fun to click through your schedules really fast 
 
 ## 🚨 Error and warning messages
 If you see this red banner, then **none** of the section type that you tried to add to your schedules could fit. In this particular case, no DIS from CHEM 130 could fit, because of either a time conflict or a section restriction. Red banners will always give you the **class section type** that couldn't be a part of your schedules
