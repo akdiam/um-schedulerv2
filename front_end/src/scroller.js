@@ -1533,6 +1533,7 @@ export default class Scroller extends React.Component {
                             placeholder="Select a lecture(s)"
                             name="lecs"
                             isMulti
+                            isSearchable={false}
                         />
                     </div>
                 } if (this.state.DiscArray !== undefined && this.state.DiscArray.length !== 0) {
@@ -1549,6 +1550,7 @@ export default class Scroller extends React.Component {
                             placeholder="Select a discussion(s)"
                             name="disc"
                             isMulti
+                            isSearchable={false}
                         />
                     </div>
                 } if (this.state.LabArray !== undefined && this.state.LabArray.length !== 0) {
@@ -1565,6 +1567,7 @@ export default class Scroller extends React.Component {
                             placeholder="Select a lab(s)"
                             name="lab"
                             isMulti
+                            isSearchable={false}
                         />
                     </div>
                 } if (this.state.SemArray !== undefined && this.state.SemArray.length !== 0) {
@@ -1581,6 +1584,7 @@ export default class Scroller extends React.Component {
                             placeholder="Select a seminar(s)"
                             name="sem"
                             isMulti
+                            isSearchable={false}
                         />
                     </div>
                 }
@@ -1598,6 +1602,7 @@ export default class Scroller extends React.Component {
                             placeholder="Select a recitation(s)"
                             name="rec"
                             isMulti
+                            isSearchable={false}
                         />
                     </div>
                 }
