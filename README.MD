@@ -6,7 +6,7 @@ This app allows students at UM to schedule their classes without the sluggishnes
 Thanks for checking out umscheduler! Here's a little info that'll help you get the most out of this tool.
 
 1. Add classes to your schedule by navigating to the class you want, adding as many sections as you'd like, and clicking the blue button labeled 'add classes to schedule'
-<img width="639" alt="Screen Shot 2020-08-10 at 1 30 10 AM" src="https://user-images.githubusercontent.com/56457896/89754226-14b5ac00-daa9-11ea-9433-a58f9e51257a.png">
+<img width="637" alt="Screen Shot 2020-08-10 at 1 33 52 AM" src="https://user-images.githubusercontent.com/56457896/89754371-9ad1f280-daa9-11ea-90c5-0091a2096bc0.png">
 
 2. Once you've added enough sections to your schedule so that you have multiple options, you'll be able to iterate through your possible schedules with the navigation buttons at the bottom of the schedule
 3. If you'd like to remove a class, click on the corresponding blue class button directly beneath the search bar. There will be an option to delete that class from your schedule
