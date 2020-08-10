@@ -17,10 +17,10 @@ Thanks for checking out umscheduler! Here's a little info that'll help you get t
 4. It's really fun to click through your schedules really fast 
 
 ## 🚨 Error and warning messages
-If you see this red banner, then **none** of the section type that you tried to add to your schedules could fit. In this particular case, no DIS from CHEM 130 could fit, because of either a time conflict or a section restriction. Red banners will always give you the **class section type** that couldn't be a part of your schedule
+If you see this red banner, then **none** of the section type that you tried to add to your schedules could fit. In this particular case, no DIS from CHEM 130 could fit, because of either a time conflict or a section restriction. Red banners will always give you the **class section type** that couldn't be a part of your schedules
 <img width="1397" alt="Screen Shot 2020-08-09 at 10 47 43 PM" src="https://user-images.githubusercontent.com/56457896/89748686-656dda80-da92-11ea-94ab-2fe3ec0b9de6.png">
 
-If you see this yellow banner, then only **some** of the section type that you tried to add to your schedule could fit. In this particular case, we're told that CHEM 130 DIS 250 couldn't be added because of either a time conflict or a section restriction. Yellow banners will always give you the **specific class sections** that couldn't be a part of your schedule
+If you see this yellow banner, then only **some** of the section type that you tried to add to your schedules could fit. In this particular case, we're told that CHEM 130 DIS 250 couldn't be added because of either a time conflict or a section restriction. Yellow banners will always give you the **specific class sections** that couldn't be a part of your schedules
 <img width="1399" alt="Screen Shot 2020-08-09 at 10 50 24 PM" src="https://user-images.githubusercontent.com/56457896/89748744-bed60980-da92-11ea-807c-de37d52c0452.png">
 
 ##  🛠 Tools
