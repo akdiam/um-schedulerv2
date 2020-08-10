@@ -18,7 +18,7 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import Grid from '@material-ui/core/Grid'
 import PublicIcon from '@material-ui/icons/Public';
 import HttpsIcon from '@material-ui/icons/Https';
-import GitHubIcon from '@material-ui/icons/GitHub';
+import HelpIcon from '@material-ui/icons/Help';
 import Alert from '@material-ui/lab/Alert';
 import Tooltip from '@material-ui/core/Tooltip';
 
@@ -1619,9 +1619,9 @@ export default class Scroller extends React.Component {
                 <div className = "left-div">
                     {/* SEARCH FOR CLASS */}
                     <div id="top-row">
-                        <h3 style={{textAlign:'center'}}>umich scheduler (w/    no conflicts)</h3>
-                        <p id="blurb">add as many sections as you want, let the scheduler do the rest of the work for you!</p>
-                        <Button variant="outlined" color="primary" startIcon={<GitHubIcon/>} onClick={this.showSource}>Source</Button>
+                        <h3 style={{textAlign:'center'}}>umscheduler</h3>
+                        <p id="blurb">schedule building made easy</p>
+                        <Button variant="outlined" color="primary" startIcon={<HelpIcon/>} onClick={this.showSource}>Help me!</Button>
                     </div>
                     
                     {search_bar}
