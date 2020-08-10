@@ -5,7 +5,7 @@ This app allows students at UM to schedule their classes without the sluggishnes
 ## ☄️ How to use
 Thanks for checking out umscheduler! Here's a little info that'll help you get the most out of this tool.
 
-1. Add classes to your schedule by navigating to the class you want, adding as many sections as you'd like, and clicking the blue button labeled 'add classes to schedule)
+1. Add classes to your schedule by navigating to the class you want, adding as many sections as you'd like, and clicking the blue button labeled 'add classes to schedule'
 2. Once you've added enough sections to your schedule so that you have multiple options, you'll be able to iterate through your possible schedules with the navigation buttons at the bottom of the schedule
 3. If you'd like to remove a class, click on the corresponding blue class button directly beneath the search bar. There will be an option to delete that class from your schedule
 4. To see which sections you've chosen to add to each class, hover your mouse over the class buttons directly beneath the search bar
@@ -23,6 +23,11 @@ If you see this red banner, then **none** of the section type that you tried to 
 If you see this yellow banner, then only **some** of the section type that you tried to add to your schedules could fit. In this particular case, we're told that CHEM 130 DIS 250 couldn't be added because of either a time conflict or a section restriction. Yellow banners will always give you the **specific class sections** that couldn't be a part of your schedules
 <img width="1399" alt="Screen Shot 2020-08-09 at 10 50 24 PM" src="https://user-images.githubusercontent.com/56457896/89748744-bed60980-da92-11ea-807c-de37d52c0452.png">
 
+## 🤒 Issues 
+This project relies heavily on the LSA course guide, and the complete course catalog that UM releases publically on their website. Both the course guide and the catalog are HUGE, which is obviously amazing, but it comes with its drawbacks in this application. Unfortunately, because of the sheer size of the resources I'm pulling from, there are many pieces of information missing. For instance, a lot of the lecture/discussion sections don't even have days or times assigned to them yet. This makes visualizing these sections on the calendar impossible, and while they show up when hovering over the class buttons, they can be misleading if you don't see them on your calendar as well
+
+Hopefully next semester's information will be a little more complete, but for now it's just something we have to deal with
+
 ##  🛠 Tools
 
 I used React for the front end, and Node/Express for the back end. I also used Python to scrape the class descriptions from the LSA course guide, as well as to generate the links to each class's course guide page and each class's ATLAS page.
@@ -30,3 +35,5 @@ I used React for the front end, and Node/Express for the back end. I also used P
 ## 💣 Issues
 
 This was my first project in JS let alone React, so there was a lot to learn, and the structure of this project kinda reflects this. However, I did learn a ton and will take what I learned into whatever project comes up next 🔛🔝🔜✔️
+
+If you'd like to see some of my notes about issues that I've come across in this project, check out 'notes.txt' in the home directory!
