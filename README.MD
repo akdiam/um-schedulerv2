@@ -6,9 +6,15 @@ This app allows students at UM to schedule their classes without the sluggishnes
 Thanks for checking out umscheduler! Here's a little info that'll help you get the most out of this tool.
 
 1. Add classes to your schedule by navigating to the class you want, adding as many sections as you'd like, and clicking the blue button labeled 'add classes to schedule'
+<img width="639" alt="Screen Shot 2020-08-10 at 1 30 10 AM" src="https://user-images.githubusercontent.com/56457896/89754226-14b5ac00-daa9-11ea-9433-a58f9e51257a.png">
+
 2. Once you've added enough sections to your schedule so that you have multiple options, you'll be able to iterate through your possible schedules with the navigation buttons at the bottom of the schedule
 3. If you'd like to remove a class, click on the corresponding blue class button directly beneath the search bar. There will be an option to delete that class from your schedule
+<img width="634" alt="Screen Shot 2020-08-10 at 1 32 16 AM" src="https://user-images.githubusercontent.com/56457896/89754307-62321900-daa9-11ea-8f2d-39dd56f839ec.png">
+
 4. To see which sections you've chosen to add to each class, hover your mouse over the class buttons directly beneath the search bar
+<img width="244" alt="Screen Shot 2020-08-10 at 1 31 33 AM" src="https://user-images.githubusercontent.com/56457896/89754274-4595e100-daa9-11ea-9c8f-3fd39e6c4ef1.png">
+
 
 ## 🦴 Core features
 1. First and foremost, umscheduler is a scheduler generator that gives you **all possible schedules** based on the sections you choose, as well as some constraints listed below
