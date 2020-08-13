@@ -44,7 +44,11 @@ export const EdgeCases = {
 
     "BIOLOGY 173": {
         "LEC 006": ["LAB 501", "LAB 502"]
-    },  
+    }, 
+    
+    "CEE 345": {
+        "LEC 001": ["LAB 004", "LAB 005"]
+    },
 
     "CHE 230": {
         "LEC 001": ["DIS 002", "DIS 004", "DIS 006", "DIS 007"],

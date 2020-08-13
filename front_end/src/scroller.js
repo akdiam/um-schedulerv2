@@ -302,12 +302,38 @@ export default class Scroller extends React.Component {
 
         let start = unformattedTime.substr(0, unformattedTime.indexOf('-'))
         let end = unformattedTime.split(/[- ABCDEFGHIJKLMNOPQRSTUVWXYZ]/)[1]
+        console.log(end);
         let ampm = unformattedTime.split(/[- 0123456789]/).slice(-1)[0]
         let start_hour
         let start_min
         let end_hour
         let end_min
-        if (start.includes("30")) {
+
+        if (start.length > 2) {
+            if (start.length === 3) {
+                start_hour = parseInt(start[0]);
+                start_min = parseInt(start[1]+start[2]);
+            } else {
+                start_hour = parseInt(start[0]+start[1]);
+                start_min = parseInt(start[2]+start[3]);
+            }
+        } else {
+            start_hour = parseInt(start);
+            start_min = 0;
+        }
+        if (end.length > 2) {
+            if (end.length === 3) {
+                end_hour = parseInt(end[0]);
+                end_min = parseInt(end[1]+end[2]);
+            } else {
+                end_hour = parseInt(end[0]+end[1]);
+                end_min = parseInt(end[2]+end[3]);
+            }
+        } else {
+            end_hour = parseInt(end);
+            end_min = 0;
+        }
+        /*if (start.includes("30")) {
             let hour = start.substr(0, start.indexOf("30"));
             start_hour = parseInt(hour);
             start_min = 30
@@ -322,7 +348,7 @@ export default class Scroller extends React.Component {
         } else {
             end_hour = parseInt(end);
             end_min = 0;
-        }
+        }*/
 
         if (start_hour >= 8 && start_hour <= 12 && end_hour > 0 && end_hour <= 9 && ampm === "PM") {
             end_hour += 12;
@@ -554,18 +580,18 @@ export default class Scroller extends React.Component {
                 if (inner_conflict_counter === all_schedules.length) {
                     ++conflict_counter
                     if (!missing_classes.includes(interval_obj[k][0]['value'])) {
-                        missing_classes += (interval_obj[k][0]['value'] + ', ')
+                        //missing_classes += (interval_obj[k][0]['value'] + ', ')
                         classes_to_remove.push(interval_obj[k][0]['value'])
                     }
                 } 
                 if (inner_edgecase_counter === all_schedules.length) {
                     ++edgecase_counter
                     if (!missing_classes.includes(interval_obj[k][0]['value'])) {
-                        missing_classes += (interval_obj[k][0]['value'] + ', ')
+                        //missing_classes += (interval_obj[k][0]['value'] + ', ')
                         classes_to_remove.push(interval_obj[k][0]['value'])
                     }
                 }
-            }
+            }   
         }
         if (conflict_counter === interval_obj.length || edgecase_counter === interval_obj.length) {
             //alert(`Couldn't add any ${type} that you selected to your schedule because all brought conflicts`)
@@ -573,7 +599,7 @@ export default class Scroller extends React.Component {
         } 
         else {
             forgotten_classes = this.check_forgotten(unadded, new_all)
-            if (missing_classes.length === 0) {
+            if (classes_to_remove.length === 0) {
                 return [new_all, true, classes_to_remove, forgotten_classes];
             } else {
                 //alert(`Couldn't add ${missing_classes} to your schedule because they brought conflicts`)
@@ -1449,7 +1475,11 @@ export default class Scroller extends React.Component {
                 Back to Subjects
             </Button>
 
-            let description = ClassDescs[this.state.CurrentSubj].filter(subj => subj['num'] === parseInt(this.state.SelectedClass))
+            let description = [];
+            let temp_obj = {desc: 'Description not currently availabe'}
+            description.push(temp_obj);
+            if (ClassDescs[this.state.CurrentSubj])
+                description = ClassDescs[this.state.CurrentSubj].filter(subj => subj['num'] === parseInt(this.state.SelectedClass))
             
             if (this.state.show_desc) {
                 class_header = 
@@ -1651,8 +1681,8 @@ export default class Scroller extends React.Component {
                     {del_btn}
                 </div>
                 <div className = "right-div">
-                    {cal}
                     {nextprev}
+                    {cal}
                 </div>
             </div>
         );
