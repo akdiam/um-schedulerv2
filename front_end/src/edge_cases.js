@@ -156,6 +156,11 @@ export const EdgeCases = {
         "LEC 005": ["DIS 006", "DIS 007", "DIS 008", "DIS 009"]
     },
 
+    "EEB 372": {
+        "LEC 010": ["DIS 011", "DIS 012"],
+        "LEC 020": ["DIS 021", "DIS 022"]
+    },
+
     "ECON 101": {
         "LEC 100": ["DIS 101", "DIS 102", "DIS 103", "DIS 104", "DIS 105", "DIS 106", "DIS 107", "DIS 108", "DIS 109", 
                     "DIS 110", "DIS 111"], 

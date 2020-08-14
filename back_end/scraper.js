@@ -1,9 +1,17 @@
 const request = require("request-promise")
 const cheerio = require("cheerio");
 
-const section_ten = ["AEROSP205","PHYSICS136", "PHYSICS141", "PHYSICS236", "MATH215"]
-const section_two = ["BIOLOGY120"]
+const section_ten = ["AEROSP205","PHYSICS136", "PHYSICS141", "PHYSICS236", "MATH215", "ALA 170", "EEB372", "ENVIRON372", "PSYCH305"]
+const section_two = ["BIOLOGY120", "AAS338", "ALA322", "ALA370", "AMCULT103", "AMCULT213", "AMCULT311", "BIOLOGY117", "COMPLIT376", "EARTH106", "EARTH109",
+                    "EARTH 112", "EARTH113", "EARTH218", "EARTH223", "ENGLISH317", "ENVIRON233", "ENVIRON304", "HISTART393", "HISTORY407", "HISTORY491",
+                    "INSTHUM311", "IOE425", "ITALIAN101", "LATINOAM213", "MATH424", "PAT201", "PORTUG280", "PSYCH121", "PSYCH324", "RCHUMS425", "RCHUMS426",
+                    "SLAVIC470", "SOC324", "SPANISH381", "SPANISH420", "SPANISH426", "STATS412", "STATS449", "TCHNCLCM380", "UC390"]
+const section_hunnid = ["APPPHYS 576", "ECON101", "ECON102", "ECON251", "ENGR151", "MATSCIE220", "MATSCIE250", "STATS206", "STATS250"]
 const section_ooo = ["CEE211", "CEE265", "CEE312", "CEE351", "CEE365", "CEE412", "CEE413"]
+const section_three = ["AAS104", "AAS290", "AMCULT358", "ANTHRCULT458", "DIGITAL258", "DIGITAL358", "EEB401", "ENVIRON139", "FRENCH103", "FTVM366", "JUDAIC150",
+                        "RCARTS290", "SPANISH289"]
+const section_six = ["AAS495"]
+const section_twenty = ["MATH216"]
 // this gets the class info for a class in an easy to read format (open/closed data for all sections)
 fos = (input) => (async() => {
     const class_name = input;
@@ -21,6 +29,18 @@ fos = (input) => (async() => {
     if (section_ooo.includes(class_name)) {
         class_page = `https://www.lsa.umich.edu/cg/cg_detail.aspx?content=2310${class_name}101&termArray=f_20_2310"`
     }
+    if (section_hunnid.includes(class_name)) {
+        class_page = `https://www.lsa.umich.edu/cg/cg_detail.aspx?content=2310${class_name}100&termArray=f_20_2310"`
+    }
+    if (section_three.includes(class_name)) {
+        class_page = `https://www.lsa.umich.edu/cg/cg_detail.aspx?content=2310${class_name}003&termArray=f_20_2310"`
+    }
+    if (section_six.includes(class_name)) {
+        class_page = `https://www.lsa.umich.edu/cg/cg_detail.aspx?content=2310${class_name}006&termArray=f_20_2310"`
+    }
+    if (section_twenty.includes(class_name)) {
+        class_page = `https://www.lsa.umich.edu/cg/cg_detail.aspx?content=2310${class_name}020&termArray=f_20_2310"`
+    }
     
     const response = await request({
         uri: class_page,
@@ -31,8 +51,7 @@ fos = (input) => (async() => {
         },
         gzip: true, 
     });
-    
-    console.log(response)
+
     // class_data contains all the enrollment data we need for each section of a specific class
     let class_data = []
     
